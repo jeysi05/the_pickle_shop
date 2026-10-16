@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#0b3d1e">
 <title>The Pickle Shop — Book the Court</title>
 <meta name="description" content="Private pickleball court in Taytay, Rizal. Pick a slot, pay with GCash or card, get your gate instructions.">
@@ -24,7 +24,8 @@
   --danger:#c2410c;
 }
 *{box-sizing:border-box;margin:0;padding:0}
-html{scroll-behavior:smooth}
+html{scroll-behavior:smooth;-webkit-text-size-adjust:100%}
+button{-webkit-tap-highlight-color:transparent}
 body{font-family:'Bricolage Grotesque',system-ui,sans-serif;background:var(--cream);color:var(--ink);line-height:1.45;-webkit-font-smoothing:antialiased;padding-bottom:90px}
 button{font:inherit;color:inherit;cursor:pointer;border:0;background:none}
 input{font:inherit}
@@ -59,7 +60,7 @@ nav a.cta:hover{background:var(--grape-dark)}
 .btn:disabled{opacity:.5;cursor:not-allowed;transform:none;box-shadow:4px 4px 0 var(--deep)}
 .btn.ghost{background:var(--paper);color:var(--deep)}
 .court-wrap{position:relative}
-.court-wrap svg{width:100%;height:auto;display:block;transform:rotate(-3deg);filter:drop-shadow(8px 10px 0 rgba(11,61,30,.9))}
+.court-wrap .court{width:100%;height:auto;display:block;transform:rotate(-3deg);filter:drop-shadow(8px 10px 0 rgba(11,61,30,.9))}
 .ball{position:absolute;width:64px;height:64px;right:6%;top:-6%;animation:bounce 2.4s cubic-bezier(.5,0,.5,1) infinite}
 @keyframes bounce{0%,100%{transform:translateY(0) rotate(0)}50%{transform:translateY(46px) rotate(120deg)}}
 .facts{display:flex;gap:26px;flex-wrap:wrap;margin-top:34px;font-size:.92rem;font-weight:600}
@@ -87,7 +88,7 @@ nav a.cta:hover{background:var(--grape-dark)}
 .slot{padding:14px 12px;border-radius:14px;background:var(--paper);color:var(--ink);text-align:left;border:2px solid transparent;position:relative;transition:.12s}
 .slot b{display:block;font-size:1.05rem}
 .slot span{font-size:.8rem;color:var(--muted)}
-.slot.open:hover{border-color:var(--grape);transform:translateY(-2px)}
+@media (hover:hover){.slot.open:hover{border-color:var(--grape);transform:translateY(-2px)}}
 .slot.sel{background:var(--grape);color:#fff;border-color:var(--ball)}
 .slot.sel span{color:#f1d6fb}
 .slot.sel::after{content:"✓";position:absolute;right:12px;top:10px;font-weight:800}
@@ -191,12 +192,20 @@ th{background:var(--deep);color:var(--cream);font-size:.75rem;letter-spacing:.1e
   .hero{grid-template-columns:1fr;padding-top:36px}
   .court-wrap{order:-1;max-width:420px}
   .find-in{grid-template-columns:1fr}
-  .step{grid-template-columns:60px 1fr}
-  .step .n{font-size:2.2rem}
+  .court-wrap{max-width:300px;margin-left:6px}
+  .ball{width:46px;height:46px}
+  .step{grid-template-columns:44px 1fr;gap:12px}
+  .step .n{font-size:2rem}
   nav a:not(.cta){display:none}
   .kpis{grid-template-columns:1fr}
   .slots{grid-template-columns:repeat(2,1fr)}
-  .bar{flex-wrap:wrap}
+  .slot{padding:11px 12px}
+  .book{padding:50px 5vw 70px}
+  .bar{padding:10px 16px calc(10px + env(safe-area-inset-bottom));gap:12px}
+  .bar .t{font-size:.9rem;line-height:1.2}
+  .bar .d{font-size:.78rem}
+  .bar .btn{padding:10px 16px;white-space:nowrap;box-shadow:3px 3px 0 var(--deep);font-size:.92rem}
+  .drawer{width:100%}
 }
 @media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 </style>
@@ -228,7 +237,7 @@ th{background:var(--deep);color:var(--cream);font-size:.75rem;letter-spacing:.1e
       </div>
     </div>
     <div class="court-wrap" aria-hidden="true">
-      <svg viewBox="0 0 460 230" xmlns="http://www.w3.org/2000/svg">
+      <svg class="court" viewBox="0 0 460 230" xmlns="http://www.w3.org/2000/svg">
         <rect x="0" y="0" width="460" height="230" rx="18" fill="#0b3d1e"/>
         <rect x="14" y="14" width="432" height="202" rx="8" fill="#1d9a2a"/>
         <rect x="40" y="35" width="380" height="160" fill="#b64fe0" opacity=".92"/>
@@ -242,7 +251,7 @@ th{background:var(--deep);color:var(--cream);font-size:.75rem;letter-spacing:.1e
         <text x="93" y="82" fill="#fffdf5" font-family="Shrikhand" font-size="15" text-anchor="middle" opacity=".85">kitchen</text>
         <text x="367" y="82" fill="#fffdf5" font-family="Shrikhand" font-size="15" text-anchor="middle" opacity=".85">kitchen</text>
       </svg>
-      <svg class="ball" viewBox="0 0 64 64" style="transform:none;filter:none"><circle cx="32" cy="32" r="30" fill="#e8f43c" stroke="#0b3d1e" stroke-width="3"/><g fill="#0b3d1e" opacity=".75"><circle cx="20" cy="22" r="3"/><circle cx="34" cy="14" r="3"/><circle cx="44" cy="28" r="3"/><circle cx="24" cy="38" r="3"/><circle cx="38" cy="44" r="3"/><circle cx="15" cy="32" r="3"/><circle cx="48" cy="42" r="3"/></g></svg>
+      <svg class="ball" viewBox="0 0 64 64"><circle cx="32" cy="32" r="30" fill="#e8f43c" stroke="#0b3d1e" stroke-width="3"/><g fill="#0b3d1e" opacity=".75"><circle cx="20" cy="22" r="3"/><circle cx="34" cy="14" r="3"/><circle cx="44" cy="28" r="3"/><circle cx="24" cy="38" r="3"/><circle cx="38" cy="44" r="3"/><circle cx="15" cy="32" r="3"/><circle cx="48" cy="42" r="3"/></g></svg>
     </div>
   </section>
 
@@ -382,6 +391,7 @@ const hLabel = h => { const s=h>=12?"PM":"AM"; const x=h%12||12; return `${x}:00
 const esc = s => String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const parseKey = k => { const [y,m,d]=k.split("-").map(Number); return new Date(y,m-1,d); };
 const longDate = k => parseKey(k).toLocaleDateString("en-PH",{weekday:"long",month:"long",day:"numeric"});
+const shortDate = k => parseKey(k).toLocaleDateString("en-PH",{weekday:"short",month:"short",day:"numeric"});
 const hasHour = (hrs) => `${hLabel(hrs[0])} – ${hLabel(hrs[hrs.length-1]+1)}`;
 function toast(m){ const t=$("toast"); t.textContent=m; t.classList.add("on"); clearTimeout(toast._t); toast._t=setTimeout(()=>t.classList.remove("on"),2600); }
 
@@ -448,7 +458,7 @@ function total(){ return sel.reduce((s,h)=>s+CONFIG.PRICE(h),0); }
 function updateBar(){
   const bar=$("bar");
   if(!sel.length){ bar.classList.remove("show"); return; }
-  $("barT").textContent = `${longDate(date)} · ${hasHour(sel)}`;
+  $("barT").textContent = `${shortDate(date)} · ${hasHour(sel)}`;
   $("barD").textContent = `${sel.length} hour${sel.length>1?"s":""} · ${peso(total())}`;
   bar.classList.add("show");
 }
