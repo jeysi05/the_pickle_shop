@@ -1,0 +1,599 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#0b3d1e">
+<title>The Pickle Shop — Book the Court</title>
+<meta name="description" content="Private pickleball court in Taytay, Rizal. Pick a slot, pay with GCash or card, get your gate instructions.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Shrikhand&family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,500;12..96,700;12..96,800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --green:#1d9a2a;
+  --deep:#0b3d1e;
+  --ink:#10281a;
+  --grape:#b64fe0;
+  --grape-dark:#8a2fb3;
+  --ball:#e8f43c;
+  --cream:#f6f1e1;
+  --paper:#fffdf5;
+  --line:rgba(16,40,26,.14);
+  --muted:#5b6b60;
+  --danger:#c2410c;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{font-family:'Bricolage Grotesque',system-ui,sans-serif;background:var(--cream);color:var(--ink);line-height:1.45;-webkit-font-smoothing:antialiased;padding-bottom:90px}
+button{font:inherit;color:inherit;cursor:pointer;border:0;background:none}
+input{font:inherit}
+a{color:inherit}
+.display{font-family:'Shrikhand',serif;font-weight:400}
+
+/* ribbon */
+.ribbon{background:var(--ball);color:var(--deep);font-weight:700;font-size:.85rem;overflow:hidden;white-space:nowrap;border-bottom:2px solid var(--deep)}
+.ribbon div{display:inline-block;padding:8px 0;animation:marquee 28s linear infinite}
+.ribbon span{margin:0 22px}
+@keyframes marquee{to{transform:translateX(-50%)}}
+
+/* header */
+header{display:flex;align-items:center;justify-content:space-between;padding:14px 5vw;position:sticky;top:0;z-index:30;background:var(--cream);border-bottom:2px solid var(--deep)}
+.brand{display:flex;align-items:center;gap:12px;text-decoration:none}
+.badge{width:46px;height:46px;border-radius:50%;background:var(--green);border:3px solid var(--deep);display:grid;place-items:center;color:var(--grape);font-family:'Shrikhand';font-size:.8rem;line-height:.85;text-align:center;text-shadow:1px 1px 0 var(--deep)}
+.brand b{font-family:'Shrikhand';font-weight:400;font-size:1.3rem;color:var(--deep)}
+nav{display:flex;gap:6px;align-items:center}
+nav a{text-decoration:none;font-weight:600;font-size:.92rem;padding:8px 14px;border-radius:99px}
+nav a:hover{background:rgba(16,40,26,.08)}
+nav a.cta{background:var(--deep);color:var(--cream)}
+nav a.cta:hover{background:var(--grape-dark)}
+
+/* hero */
+.hero{display:grid;grid-template-columns:1.05fr .95fr;gap:4vw;align-items:center;padding:6vw 5vw 5vw;max-width:1300px;margin:0 auto}
+.hero .kicker{display:inline-block;font-weight:700;font-size:.8rem;letter-spacing:.14em;text-transform:uppercase;border:2px solid var(--deep);padding:5px 12px;border-radius:99px;margin-bottom:22px}
+.hero h1{font-family:'Shrikhand';font-weight:400;font-size:clamp(2.6rem,7vw,5.6rem);line-height:.98;color:var(--deep);letter-spacing:-.01em}
+.hero h1 em{font-style:normal;color:var(--grape);display:inline-block;transform:rotate(-2deg)}
+.hero p{max-width:30em;margin:22px 0 30px;font-size:1.12rem;color:#2f4638}
+.btn{display:inline-flex;align-items:center;gap:10px;background:var(--grape);color:#fff;font-weight:800;padding:15px 26px;border-radius:14px;border:2px solid var(--deep);box-shadow:4px 4px 0 var(--deep);text-decoration:none;transition:transform .12s,box-shadow .12s}
+.btn:hover{transform:translate(2px,2px);box-shadow:2px 2px 0 var(--deep)}
+.btn:disabled{opacity:.5;cursor:not-allowed;transform:none;box-shadow:4px 4px 0 var(--deep)}
+.btn.ghost{background:var(--paper);color:var(--deep)}
+.court-wrap{position:relative}
+.court-wrap svg{width:100%;height:auto;display:block;transform:rotate(-3deg);filter:drop-shadow(8px 10px 0 rgba(11,61,30,.9))}
+.ball{position:absolute;width:64px;height:64px;right:6%;top:-6%;animation:bounce 2.4s cubic-bezier(.5,0,.5,1) infinite}
+@keyframes bounce{0%,100%{transform:translateY(0) rotate(0)}50%{transform:translateY(46px) rotate(120deg)}}
+.facts{display:flex;gap:26px;flex-wrap:wrap;margin-top:34px;font-size:.92rem;font-weight:600}
+.facts span{display:flex;gap:8px;align-items:center}
+.facts i{width:10px;height:10px;border-radius:50%;background:var(--green);display:inline-block}
+
+/* booking */
+.book{background:var(--deep);color:var(--cream);padding:70px 5vw 90px;position:relative}
+.book::before{content:"";position:absolute;inset:0;background:
+  linear-gradient(rgba(246,241,225,.07) 2px,transparent 2px) 0 0/100% 120px,
+  linear-gradient(90deg,rgba(246,241,225,.07) 2px,transparent 2px) 0 0/120px 100%;pointer-events:none}
+.book-in{max-width:1100px;margin:0 auto;position:relative}
+.book h2{font-family:'Shrikhand';font-weight:400;font-size:clamp(2rem,5vw,3.4rem);line-height:1}
+.book .sub{color:#a9c9b3;margin:10px 0 34px;max-width:36em}
+.days{display:flex;gap:10px;overflow-x:auto;padding:6px 4px 18px;scroll-snap-type:x proximity}
+.day{flex:0 0 auto;scroll-snap-align:start;width:78px;padding:12px 0;border-radius:16px;text-align:center;background:rgba(246,241,225,.08);border:2px solid rgba(246,241,225,.2);transition:.15s}
+.day small{display:block;font-size:.72rem;letter-spacing:.1em;text-transform:uppercase;opacity:.8}
+.day strong{display:block;font-family:'Shrikhand';font-weight:400;font-size:1.8rem;line-height:1.1}
+.day:hover{border-color:var(--ball)}
+.day.on{background:var(--ball);color:var(--deep);border-color:var(--ball);transform:translateY(-3px)}
+.period{margin-top:26px}
+.period h3{font-size:.8rem;letter-spacing:.16em;text-transform:uppercase;color:var(--ball);margin-bottom:12px;display:flex;gap:12px;align-items:center}
+.period h3::after{content:"";flex:1;height:2px;background:rgba(246,241,225,.2)}
+.slots{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px}
+.slot{padding:14px 12px;border-radius:14px;background:var(--paper);color:var(--ink);text-align:left;border:2px solid transparent;position:relative;transition:.12s}
+.slot b{display:block;font-size:1.05rem}
+.slot span{font-size:.8rem;color:var(--muted)}
+.slot.open:hover{border-color:var(--grape);transform:translateY(-2px)}
+.slot.sel{background:var(--grape);color:#fff;border-color:var(--ball)}
+.slot.sel span{color:#f1d6fb}
+.slot.sel::after{content:"✓";position:absolute;right:12px;top:10px;font-weight:800}
+.slot.off{background:transparent;color:rgba(246,241,225,.38);border:2px dashed rgba(246,241,225,.2);cursor:not-allowed}
+.slot.off b{text-decoration:line-through}
+.slot.off span{color:inherit}
+.hint{margin-top:26px;font-size:.88rem;color:#a9c9b3}
+
+/* sticky bar */
+.bar{position:fixed;left:0;right:0;bottom:0;z-index:40;background:var(--paper);border-top:3px solid var(--deep);padding:12px 5vw;display:flex;gap:16px;align-items:center;justify-content:space-between;transform:translateY(110%);transition:transform .25s}
+.bar.show{transform:none}
+.bar .t{font-weight:800}
+.bar .d{font-size:.85rem;color:var(--muted)}
+.bar .btn{padding:12px 22px}
+
+/* how */
+.how{max-width:1100px;margin:0 auto;padding:80px 5vw}
+.how h2{font-family:'Shrikhand';font-weight:400;font-size:clamp(1.8rem,4vw,2.8rem);color:var(--deep);margin-bottom:34px}
+.steps{display:grid;gap:0}
+.step{display:grid;grid-template-columns:90px 1fr;gap:20px;align-items:baseline;padding:22px 0;border-top:2px solid var(--deep)}
+.step:last-child{border-bottom:2px solid var(--deep)}
+.step .n{font-family:'Shrikhand';font-size:3rem;color:var(--grape);line-height:1}
+.step h4{font-size:1.25rem;margin-bottom:4px}
+.step p{color:#34493b;max-width:42em}
+
+/* find */
+.find{background:var(--grape);color:#fff;padding:70px 5vw;border-top:3px solid var(--deep);border-bottom:3px solid var(--deep)}
+.find-in{max-width:1100px;margin:0 auto;display:grid;grid-template-columns:1.1fr .9fr;gap:40px;align-items:center}
+.find h2{font-family:'Shrikhand';font-weight:400;font-size:clamp(1.8rem,4vw,2.8rem);line-height:1.05;margin-bottom:14px}
+.find p{max-width:32em;margin-bottom:8px}
+.find .addr{background:var(--paper);color:var(--ink);padding:22px;border-radius:18px;border:3px solid var(--deep);box-shadow:6px 6px 0 var(--deep)}
+.find .addr b{display:block;font-size:1.1rem;margin-bottom:4px}
+.find .addr a{display:inline-block;margin-top:14px;font-weight:800;color:var(--grape-dark)}
+
+footer{padding:34px 5vw 120px;display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap;font-size:.88rem;color:var(--muted);max-width:1300px;margin:0 auto}
+footer button{text-decoration:underline;color:var(--muted)}
+
+/* drawer */
+.scrim{position:fixed;inset:0;background:rgba(11,61,30,.6);z-index:60;opacity:0;pointer-events:none;transition:.2s}
+.scrim.on{opacity:1;pointer-events:auto}
+.drawer{position:fixed;top:0;right:0;bottom:0;width:min(460px,100%);background:var(--paper);z-index:70;transform:translateX(105%);transition:transform .28s cubic-bezier(.2,.8,.2,1);display:flex;flex-direction:column;border-left:3px solid var(--deep)}
+.drawer.on{transform:none}
+.dh{padding:22px 26px;border-bottom:2px dashed var(--line);display:flex;justify-content:space-between;align-items:flex-start}
+.dh h3{font-family:'Shrikhand';font-weight:400;font-size:1.7rem;color:var(--deep)}
+.x{font-size:1.6rem;line-height:1;padding:4px 8px;border-radius:8px}
+.x:hover{background:rgba(0,0,0,.07)}
+.db{padding:22px 26px;overflow-y:auto;flex:1}
+.sum{background:var(--cream);border:2px solid var(--deep);border-radius:14px;padding:14px 16px;margin-bottom:12px}
+.sum b{display:block}
+.sum small{color:var(--muted)}
+.hold{font-size:.85rem;color:var(--danger);font-weight:700;margin-bottom:18px}
+label{display:block;font-weight:700;font-size:.85rem;margin:14px 0 6px}
+input[type=text],input[type=email],input[type=tel],input[type=password]{width:100%;padding:13px 14px;border:2px solid var(--line);border-radius:12px;background:#fff;transition:.15s}
+input:focus{outline:none;border-color:var(--grape);box-shadow:0 0 0 4px rgba(182,79,224,.15)}
+input.bad{border-color:var(--danger)}
+.err{color:var(--danger);font-size:.8rem;margin-top:4px;min-height:1em}
+.pay{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:6px}
+.pay label{margin:0;border:2px solid var(--line);border-radius:12px;padding:12px;display:flex;gap:8px;align-items:center;cursor:pointer;font-weight:700}
+.pay input{accent-color:var(--grape)}
+.pay label:has(input:checked){border-color:var(--grape);background:#f8ebfd}
+.df{padding:18px 26px 24px;border-top:2px dashed var(--line)}
+.tot{display:flex;justify-content:space-between;font-weight:800;font-size:1.15rem;margin-bottom:14px}
+.df .btn{width:100%;justify-content:center}
+.fine{font-size:.76rem;color:var(--muted);margin-top:10px;text-align:center}
+
+/* ticket */
+.ticket{text-align:center}
+.ticket .ok{font-family:'Shrikhand';font-size:2.2rem;color:var(--green);line-height:1.05;margin:6px 0 8px}
+.tk{margin:20px 0;border:3px solid var(--deep);border-radius:18px;background:#fff;position:relative;overflow:hidden}
+.tk .top{background:var(--green);color:#fff;padding:14px;font-weight:800;letter-spacing:.06em}
+.tk .mid{padding:16px;text-align:left;display:grid;gap:8px;font-size:.95rem}
+.tk .mid div{display:flex;justify-content:space-between;gap:10px}
+.tk .mid span{color:var(--muted)}
+.tk .gate{border-top:2px dashed var(--deep);padding:14px 16px;text-align:left;background:var(--cream);font-size:.9rem}
+.tk .gate b{display:block;font-size:.72rem;letter-spacing:.14em;text-transform:uppercase;color:var(--grape-dark);margin-bottom:4px}
+.demo{background:var(--ball);color:var(--deep);font-size:.78rem;font-weight:700;padding:8px 12px;border-radius:10px;border:2px solid var(--deep);margin-top:6px}
+
+/* staff */
+.staff{position:fixed;inset:0;background:var(--cream);z-index:80;overflow:auto;display:none}
+.staff.on{display:block}
+.staff-in{max-width:1000px;margin:0 auto;padding:30px 5vw 80px}
+.staff h2{font-family:'Shrikhand';font-weight:400;font-size:2.2rem;color:var(--deep)}
+.top{display:flex;justify-content:space-between;align-items:center;margin-bottom:24px;gap:12px}
+.kpis{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:28px}
+.kpi{background:var(--paper);border:2px solid var(--deep);border-radius:14px;padding:16px}
+.kpi small{font-weight:700;text-transform:uppercase;letter-spacing:.1em;font-size:.7rem;color:var(--muted)}
+.kpi b{display:block;font-family:'Shrikhand';font-weight:400;font-size:2rem;color:var(--grape-dark)}
+.staff h3{margin:26px 0 10px}
+table{width:100%;border-collapse:collapse;background:var(--paper);border:2px solid var(--deep);border-radius:12px;overflow:hidden;font-size:.9rem}
+th,td{padding:11px 14px;text-align:left;border-bottom:1px solid var(--line)}
+th{background:var(--deep);color:var(--cream);font-size:.75rem;letter-spacing:.1em;text-transform:uppercase}
+.blk{display:grid;grid-template-columns:repeat(auto-fill,minmax(110px,1fr));gap:8px}
+.blk button{padding:10px;border-radius:10px;border:2px solid var(--deep);background:var(--paper);font-weight:700;font-size:.85rem}
+.blk button.is{background:var(--danger);color:#fff;border-color:var(--danger)}
+.blk button.bk{opacity:.4;cursor:not-allowed;background:#ddd}
+
+.toast{position:fixed;left:50%;bottom:100px;transform:translate(-50%,30px);background:var(--deep);color:var(--cream);padding:12px 20px;border-radius:12px;font-weight:700;z-index:100;opacity:0;pointer-events:none;transition:.25s}
+.toast.on{opacity:1;transform:translate(-50%,0)}
+
+@media(max-width:860px){
+  .hero{grid-template-columns:1fr;padding-top:36px}
+  .court-wrap{order:-1;max-width:420px}
+  .find-in{grid-template-columns:1fr}
+  .step{grid-template-columns:60px 1fr}
+  .step .n{font-size:2.2rem}
+  nav a:not(.cta){display:none}
+  .kpis{grid-template-columns:1fr}
+  .slots{grid-template-columns:repeat(2,1fr)}
+  .bar{flex-wrap:wrap}
+}
+@media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+
+<div class="ribbon"><div id="ribbonText"></div></div>
+
+<header>
+  <a class="brand" href="#top"><div class="badge">The<br>Pickle<br>Shop</div><b>The Pickle Shop</b></a>
+  <nav>
+    <a href="#how">How it works</a>
+    <a href="#find">Find us</a>
+    <a class="cta" href="#book">Book a slot</a>
+  </nav>
+</header>
+
+<main id="top">
+  <section class="hero">
+    <div>
+      <span class="kicker">Private court · Taytay, Rizal</span>
+      <h1>Your court is <em>waiting.</em> Just pick a time.</h1>
+      <p>One private pickleball court, all yours for the hour. See what's open, pay with GCash or card, and your gate instructions land in your inbox. No group chat haggling.</p>
+      <a class="btn" href="#book">See open slots →</a>
+      <div class="facts">
+        <span><i></i>Good sports</span>
+        <span><i></i>Great community</span>
+        <span><i></i>Better connections</span>
+      </div>
+    </div>
+    <div class="court-wrap" aria-hidden="true">
+      <svg viewBox="0 0 460 230" xmlns="http://www.w3.org/2000/svg">
+        <rect x="0" y="0" width="460" height="230" rx="18" fill="#0b3d1e"/>
+        <rect x="14" y="14" width="432" height="202" rx="8" fill="#1d9a2a"/>
+        <rect x="40" y="35" width="380" height="160" fill="#b64fe0" opacity=".92"/>
+        <rect x="40" y="35" width="380" height="160" fill="none" stroke="#fffdf5" stroke-width="4"/>
+        <line x1="147" y1="35" x2="147" y2="195" stroke="#fffdf5" stroke-width="4"/>
+        <line x1="313" y1="35" x2="313" y2="195" stroke="#fffdf5" stroke-width="4"/>
+        <line x1="40" y1="115" x2="147" y2="115" stroke="#fffdf5" stroke-width="4"/>
+        <line x1="313" y1="115" x2="420" y2="115" stroke="#fffdf5" stroke-width="4"/>
+        <line x1="230" y1="26" x2="230" y2="204" stroke="#0b3d1e" stroke-width="7"/>
+        <g stroke="#fffdf5" stroke-width="1" opacity=".5"><line x1="230" y1="32" x2="230" y2="198" stroke-dasharray="3 3"/></g>
+        <text x="93" y="82" fill="#fffdf5" font-family="Shrikhand" font-size="15" text-anchor="middle" opacity=".85">kitchen</text>
+        <text x="367" y="82" fill="#fffdf5" font-family="Shrikhand" font-size="15" text-anchor="middle" opacity=".85">kitchen</text>
+      </svg>
+      <svg class="ball" viewBox="0 0 64 64" style="transform:none;filter:none"><circle cx="32" cy="32" r="30" fill="#e8f43c" stroke="#0b3d1e" stroke-width="3"/><g fill="#0b3d1e" opacity=".75"><circle cx="20" cy="22" r="3"/><circle cx="34" cy="14" r="3"/><circle cx="44" cy="28" r="3"/><circle cx="24" cy="38" r="3"/><circle cx="38" cy="44" r="3"/><circle cx="15" cy="32" r="3"/><circle cx="48" cy="42" r="3"/></g></svg>
+    </div>
+  </section>
+
+  <section class="book" id="book">
+    <div class="book-in">
+      <h2>Grab your hour.</h2>
+      <p class="sub">Slots are one hour each. Tap consecutive hours to play longer (up to <span id="maxH"></span>). Taken slots are crossed out.</p>
+      <div class="days" id="days"></div>
+      <div id="periods"></div>
+      <p class="hint">Times are Philippine time. Your slot is held for 5 minutes once you start checkout.</p>
+    </div>
+  </section>
+
+  <section class="how" id="how">
+    <h2>Book in under a minute.</h2>
+    <div class="steps">
+      <div class="step"><div class="n">1</div><div><h4>Pick a day and time</h4><p>The schedule is live. If a slot shows open, it's open.</p></div></div>
+      <div class="step"><div class="n">2</div><div><h4>Pay with GCash or card</h4><p>Checkout runs through PayMongo. The slot locks the moment you pay, so nobody else can take it.</p></div></div>
+      <div class="step"><div class="n">3</div><div><h4>Get your receipt and gate info</h4><p>We email your receipt and the subdivision gate instructions right away. Show up and play.</p></div></div>
+    </div>
+  </section>
+
+  <section class="find" id="find">
+    <div class="find-in">
+      <div>
+        <h2>Tucked inside the subdivision.</h2>
+        <p>Not the easiest to spot the first time, so we made a Waze pin and a parking guide. Check our Facebook page before your first visit.</p>
+      </div>
+      <div class="addr">
+        <b>The Pickle Shop</b>
+        188 Buhangin, Taytay, Rizal 1920<br>
+        <span style="color:var(--muted);font-size:.9rem">Private court · open for booking</span><br>
+        <a href="https://www.facebook.com/" target="_blank" rel="noopener" id="fbLink">Message us on Facebook →</a>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <span>© <span id="yr"></span> The Pickle Shop. Your Space to Play &amp; Connect.</span>
+  <button id="staffLink">Staff</button>
+</footer>
+
+<!-- sticky summary bar -->
+<div class="bar" id="bar">
+  <div><div class="t" id="barT"></div><div class="d" id="barD"></div></div>
+  <button class="btn" id="barGo">Continue →</button>
+</div>
+
+<!-- checkout drawer -->
+<div class="scrim" id="scrim"></div>
+<aside class="drawer" id="drawer" aria-label="Checkout">
+  <div class="dh"><h3 id="dTitle">Almost yours</h3><button class="x" id="dClose" aria-label="Close">×</button></div>
+  <div class="db" id="dBody"></div>
+  <div class="df" id="dFoot"></div>
+</aside>
+
+<!-- staff -->
+<section class="staff" id="staff">
+  <div class="staff-in" id="staffIn"></div>
+</section>
+
+<div class="toast" id="toast"></div>
+
+<script>
+/* ==========================================================
+   CONFIG — edit these per client
+   ========================================================== */
+const CONFIG = {
+  NAME: "The Pickle Shop",
+  OPEN_HOUR: 6,            // first slot starts 6:00 AM
+  CLOSE_HOUR: 22,          // last slot ends 10:00 PM
+  DAYS_AHEAD: 14,
+  MAX_HOURS: 4,
+  HOLD_SECONDS: 300,
+  // Placeholder pricing. Replace with the owner's real rates.
+  PRICE: h => (h >= 17 ? 600 : 500),
+  GATE_INSTRUCTIONS: "Tell the guard you're booked at The Pickle Shop and show this reference code. (Replace this with the owner's real gate instructions.)",
+  RIBBON: "Soft opening promo · Book your schedule now · Pickleball for everyone · Taytay, Rizal",
+  FB_URL: "https://www.facebook.com/",
+  STAFF_PIN: "1234",       // DEMO ONLY. Real staff auth must be server-side.
+
+  // DEMO = true  → bookings live in this browser only, payment is simulated.
+  // DEMO = false → talks to your backend (see api object below).
+  DEMO: true,
+  API_BASE: "/api"
+};
+
+/* ==========================================================
+   API LAYER — swap DEMO off when the backend exists.
+   Backend contract:
+   GET  /api/availability?date=YYYY-MM-DD → { taken:[hour,...] }
+   POST /api/checkout {date,hours,name,email,phone,method}
+        → { checkoutUrl }   (server creates PayMongo checkout w/ secret key,
+                             marks slots as held, returns hosted URL)
+   POST /api/paymongo-webhook (server only) → on paid: confirm slot,
+        send receipt + gate instructions by email.
+   ========================================================== */
+const api = {
+  async availability(date){
+    if(CONFIG.DEMO) return { taken: demoTaken(date) };
+    const r = await fetch(`${CONFIG.API_BASE}/availability?date=${date}`);
+    if(!r.ok) throw new Error("availability");
+    return r.json();
+  },
+  async checkout(payload){
+    if(CONFIG.DEMO){
+      await new Promise(r=>setTimeout(r,1400));
+      const ref = "PS-" + Math.random().toString(36).slice(2,6).toUpperCase() + Math.floor(10+Math.random()*89);
+      const b = {ref, ...payload, amount: payload.hours.reduce((s,h)=>s+CONFIG.PRICE(h),0), status:"confirmed", at:Date.now()};
+      db.bookings.push(b); save();
+      return { demo:true, booking:b };
+    }
+    const r = await fetch(`${CONFIG.API_BASE}/checkout`,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(payload)});
+    if(!r.ok) throw new Error("checkout");
+    return r.json();      // { checkoutUrl }
+  }
+};
+
+/* ---------- demo store ---------- */
+const KEY = "pickleshop-demo-v2";
+let db = (()=>{ try{ return JSON.parse(localStorage.getItem(KEY)) }catch(e){return null} })() || {bookings:[], blocked:[]};
+function save(){ try{ localStorage.setItem(KEY, JSON.stringify(db)) }catch(e){} }
+function demoTaken(date){
+  const t = new Set();
+  db.bookings.forEach(b=>{ if(b.date===date && b.status==="confirmed") b.hours.forEach(h=>t.add(h)); });
+  db.blocked.forEach(k=>{ const [d,h]=k.split("|"); if(d===date) t.add(+h); });
+  return [...t];
+}
+
+/* ---------- helpers ---------- */
+const $ = id => document.getElementById(id);
+const peso = n => "₱" + n.toLocaleString("en-PH");
+const pad = n => String(n).padStart(2,"0");
+const dkey = d => `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;   // local date, not UTC
+const hLabel = h => { const s=h>=12?"PM":"AM"; const x=h%12||12; return `${x}:00 ${s}`; };
+const esc = s => String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const parseKey = k => { const [y,m,d]=k.split("-").map(Number); return new Date(y,m-1,d); };
+const longDate = k => parseKey(k).toLocaleDateString("en-PH",{weekday:"long",month:"long",day:"numeric"});
+const hasHour = (hrs) => `${hLabel(hrs[0])} – ${hLabel(hrs[hrs.length-1]+1)}`;
+function toast(m){ const t=$("toast"); t.textContent=m; t.classList.add("on"); clearTimeout(toast._t); toast._t=setTimeout(()=>t.classList.remove("on"),2600); }
+
+/* ---------- state ---------- */
+let date = dkey(new Date());
+let sel = [];
+let taken = [];
+let holdTimer = null;
+
+/* ---------- render: days ---------- */
+function renderDays(){
+  const box = $("days"); box.innerHTML="";
+  for(let i=0;i<CONFIG.DAYS_AHEAD;i++){
+    const d = new Date(); d.setDate(d.getDate()+i);
+    const k = dkey(d);
+    const b = document.createElement("button");
+    b.className = "day"+(k===date?" on":"");
+    b.innerHTML = `<small>${i===0?"Today":d.toLocaleDateString("en-PH",{weekday:"short"})}</small><strong>${d.getDate()}</strong><small>${d.toLocaleDateString("en-PH",{month:"short"})}</small>`;
+    b.onclick = ()=>{ date=k; sel=[]; renderDays(); loadSlots(); updateBar(); };
+    box.appendChild(b);
+  }
+}
+
+/* ---------- render: slots ---------- */
+async function loadSlots(){
+  try{ taken = (await api.availability(date)).taken; }catch(e){ taken=[]; toast("Couldn't load the schedule. Try again."); }
+  renderSlots();
+}
+function isPast(h){
+  const now = new Date();
+  return date===dkey(now) && h <= now.getHours();
+}
+function renderSlots(){
+  const groups = [["Morning",6,12],["Afternoon",12,17],["Evening",17,22]];
+  const box = $("periods"); box.innerHTML="";
+  groups.forEach(([name,a,b])=>{
+    const from=Math.max(a,CONFIG.OPEN_HOUR), to=Math.min(b,CONFIG.CLOSE_HOUR);
+    if(from>=to) return;
+    const sec = document.createElement("div"); sec.className="period";
+    sec.innerHTML = `<h3>${name}</h3>`;
+    const g = document.createElement("div"); g.className="slots";
+    for(let h=from;h<to;h++){
+      const off = taken.includes(h) || isPast(h);
+      const b = document.createElement("button");
+      b.className = "slot "+(off?"off":"open")+(sel.includes(h)?" sel":"");
+      b.disabled = off;
+      b.innerHTML = `<b>${hLabel(h)}</b><span>${taken.includes(h)?"Taken":isPast(h)?"Passed":peso(CONFIG.PRICE(h))}</span>`;
+      if(!off) b.onclick = ()=>pick(h);
+      g.appendChild(b);
+    }
+    sec.appendChild(g); box.appendChild(sec);
+  });
+}
+function pick(h){
+  const lo=sel[0], hi=sel[sel.length-1];
+  if(!sel.length) sel=[h];
+  else if(sel.includes(h)){ sel = (h===lo||h===hi) ? sel.filter(x=>x!==h) : [h]; }
+  else if(h===lo-1 && sel.length<CONFIG.MAX_HOURS) sel=[h,...sel];
+  else if(h===hi+1 && sel.length<CONFIG.MAX_HOURS) sel=[...sel,h];
+  else { if((h===lo-1||h===hi+1)) toast(`Max ${CONFIG.MAX_HOURS} hours per booking`); sel=[h]; }
+  renderSlots(); updateBar();
+}
+function total(){ return sel.reduce((s,h)=>s+CONFIG.PRICE(h),0); }
+function updateBar(){
+  const bar=$("bar");
+  if(!sel.length){ bar.classList.remove("show"); return; }
+  $("barT").textContent = `${longDate(date)} · ${hasHour(sel)}`;
+  $("barD").textContent = `${sel.length} hour${sel.length>1?"s":""} · ${peso(total())}`;
+  bar.classList.add("show");
+}
+
+/* ---------- checkout drawer ---------- */
+function openDrawer(){ $("scrim").classList.add("on"); $("drawer").classList.add("on"); }
+function closeDrawer(){ $("scrim").classList.remove("on"); $("drawer").classList.remove("on"); clearInterval(holdTimer); }
+$("scrim").onclick = closeDrawer; $("dClose").onclick = closeDrawer;
+$("barGo").onclick = showForm;
+
+function showForm(){
+  if(!sel.length) return;
+  $("dTitle").textContent = "Almost yours";
+  $("dBody").innerHTML = `
+    <div class="sum"><b>${longDate(date)}</b><div>${hasHour(sel)} · ${sel.length} hr${sel.length>1?"s":""}</div><small>1 private court</small></div>
+    <div class="hold" id="holdMsg"></div>
+    <label for="fName">Full name</label><input type="text" id="fName" autocomplete="name" placeholder="Juan Dela Cruz"><div class="err" id="eName"></div>
+    <label for="fEmail">Email (receipt and gate instructions go here)</label><input type="email" id="fEmail" autocomplete="email" placeholder="juan@email.com"><div class="err" id="eEmail"></div>
+    <label for="fPhone">Mobile number</label><input type="tel" id="fPhone" autocomplete="tel" placeholder="0917 123 4567"><div class="err" id="ePhone"></div>
+    <label>Pay with</label>
+    <div class="pay">
+      <label><input type="radio" name="m" value="gcash" checked> GCash</label>
+      <label><input type="radio" name="m" value="card"> Card</label>
+    </div>`;
+  $("dFoot").innerHTML = `
+    <div class="tot"><span>Total</span><span>${peso(total())}</span></div>
+    <button class="btn" id="payGo">Pay ${peso(total())}</button>
+    <div class="fine">${CONFIG.DEMO?"Demo mode: no real payment is made.":"You'll be taken to PayMongo's secure checkout."}</div>`;
+  $("payGo").onclick = submit;
+  openDrawer();
+  let left = CONFIG.HOLD_SECONDS;
+  clearInterval(holdTimer);
+  const tick=()=>{
+    const el=$("holdMsg"); if(!el) return;
+    el.textContent = `Slot held for ${Math.floor(left/60)}:${pad(left%60)}`;
+    if(left--<=0){ clearInterval(holdTimer); closeDrawer(); sel=[]; updateBar(); loadSlots(); toast("Hold expired. Pick your slot again."); }
+  };
+  tick(); holdTimer=setInterval(tick,1000);
+}
+
+function validate(){
+  let ok=true;
+  const name=$("fName").value.trim(), email=$("fEmail").value.trim(), phone=$("fPhone").value.replace(/[\s-]/g,"");
+  const set=(id,eid,bad,msg)=>{ $(id).classList.toggle("bad",bad); $(eid).textContent=bad?msg:""; if(bad) ok=false; };
+  set("fName","eName",name.length<2,"Enter your name");
+  set("fEmail","eEmail",!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email),"Enter a valid email");
+  set("fPhone","ePhone",!/^(09|\+639)\d{9}$/.test(phone),"Use a PH mobile number, e.g. 0917 123 4567");
+  return ok ? {name,email,phone} : null;
+}
+
+async function submit(){
+  const v = validate(); if(!v) return;
+  const method = document.querySelector('input[name="m"]:checked').value;
+  const btn=$("payGo"); btn.disabled=true; btn.textContent="Locking your slot…";
+  try{
+    const fresh = (await api.availability(date)).taken;
+    if(sel.some(h=>fresh.includes(h))){
+      closeDrawer(); sel=[]; updateBar(); taken=fresh; renderSlots();
+      toast("Someone just took that slot. Pick another."); return;
+    }
+    const res = await api.checkout({date, hours:[...sel], method, ...v});
+    if(res.checkoutUrl){ window.location.href = res.checkoutUrl; return; }
+    clearInterval(holdTimer);
+    showTicket(res.booking);
+  }catch(e){
+    btn.disabled=false; btn.textContent=`Pay ${peso(total())}`;
+    toast("Something went wrong. You weren't charged.");
+  }
+}
+
+function showTicket(b){
+  $("dTitle").textContent = "";
+  $("dBody").innerHTML = `
+    <div class="ticket">
+      <div class="ok">You're booked!</div>
+      <div>See you on the court, ${esc(b.name.split(" ")[0])}.</div>
+      <div class="tk">
+        <div class="top">REF ${esc(b.ref)}</div>
+        <div class="mid">
+          <div><span>Date</span><b>${esc(longDate(b.date))}</b></div>
+          <div><span>Time</span><b>${esc(hasHour(b.hours))}</b></div>
+          <div><span>Paid</span><b>${peso(b.amount)} · ${b.method==="gcash"?"GCash":"Card"}</b></div>
+        </div>
+        <div class="gate"><b>Gate instructions</b>${esc(CONFIG.GATE_INSTRUCTIONS)}</div>
+      </div>
+      <div style="font-size:.88rem;color:var(--muted)">A copy goes to ${esc(b.email)}.</div>
+      ${CONFIG.DEMO?'<div class="demo">DEMO: no payment taken, no email sent. Real version does both automatically.</div>':""}
+    </div>`;
+  $("dFoot").innerHTML = `<button class="btn ghost" id="done">Done</button>`;
+  $("done").onclick = ()=>{ closeDrawer(); sel=[]; updateBar(); loadSlots(); };
+}
+
+/* ---------- staff panel (demo) ---------- */
+function openStaff(){
+  const pin = prompt("Staff PIN");
+  if(pin!==CONFIG.STAFF_PIN){ if(pin!==null) toast("Wrong PIN"); return; }
+  renderStaff(); $("staff").classList.add("on"); document.body.style.overflow="hidden";
+}
+function renderStaff(){
+  const today = dkey(new Date());
+  const tb = db.bookings.filter(b=>b.date===today && b.status==="confirmed");
+  const rev = tb.reduce((s,b)=>s+b.amount,0);
+  const hrs = tb.reduce((s,b)=>s+b.hours.length,0);
+  const open = CONFIG.CLOSE_HOUR-CONFIG.OPEN_HOUR;
+  const all = [...db.bookings].sort((a,b)=> (a.date+String(a.hours[0]).padStart(2,"0")).localeCompare(b.date+String(b.hours[0]).padStart(2,"0")));
+  let blk="";
+  for(let h=CONFIG.OPEN_HOUR;h<CONFIG.CLOSE_HOUR;h++){
+    const booked = db.bookings.some(b=>b.date===today&&b.status==="confirmed"&&b.hours.includes(h));
+    const isB = db.blocked.includes(`${today}|${h}`);
+    blk += `<button class="${booked?"bk":isB?"is":""}" data-h="${h}" ${booked?"disabled":""}>${hLabel(h)}${isB?" · blocked":""}</button>`;
+  }
+  $("staffIn").innerHTML = `
+    <div class="top"><h2>Staff · Today</h2><button class="btn ghost" id="sClose" style="padding:10px 18px">Close</button></div>
+    <div class="kpis">
+      <div class="kpi"><small>Bookings today</small><b>${tb.length}</b></div>
+      <div class="kpi"><small>Revenue today</small><b>${peso(rev)}</b></div>
+      <div class="kpi"><small>Court utilization</small><b>${Math.round(hrs/open*100)}%</b></div>
+    </div>
+    <h3>Block a slot (maintenance, private event)</h3>
+    <div class="blk" id="blk">${blk}</div>
+    <h3>All bookings</h3>
+    <table><thead><tr><th>Ref</th><th>Player</th><th>When</th><th>Paid</th></tr></thead><tbody>
+    ${all.length? all.map(b=>`<tr><td><b>${esc(b.ref)}</b></td><td>${esc(b.name)}<br><small>${esc(b.phone)}</small></td><td>${esc(b.date)}<br><small>${esc(hasHour(b.hours))}</small></td><td>${peso(b.amount)}</td></tr>`).join("") : `<tr><td colspan="4" style="color:var(--muted)">No bookings yet.</td></tr>`}
+    </tbody></table>
+    <p style="margin-top:18px;font-size:.8rem;color:var(--muted)">Demo panel. In production this moves behind a real login and reads from the server.</p>`;
+  $("sClose").onclick = ()=>{ $("staff").classList.remove("on"); document.body.style.overflow=""; loadSlots(); };
+  $("blk").onclick = e=>{
+    const b=e.target.closest("button[data-h]"); if(!b) return;
+    const k=`${today}|${b.dataset.h}`; const i=db.blocked.indexOf(k);
+    i>=0 ? db.blocked.splice(i,1) : db.blocked.push(k);
+    save(); renderStaff();
+  };
+}
+$("staffLink").onclick = openStaff;
+
+/* ---------- init ---------- */
+(function init(){
+  const r = CONFIG.RIBBON;
+  $("ribbonText").innerHTML = (`<span>${esc(r)}</span>`).repeat(8);
+  $("maxH").textContent = CONFIG.MAX_HOURS + " hours";
+  $("yr").textContent = new Date().getFullYear();
+  $("fbLink").href = CONFIG.FB_URL;
+  renderDays(); loadSlots();
+  setInterval(()=>{ if(!$("drawer").classList.contains("on")) renderSlots(); }, 60000);
+})();
+</script>
+</body>
+</html>
