@@ -74,24 +74,30 @@ nav a.cta:hover{background:var(--grape-dark)}
   linear-gradient(90deg,rgba(246,241,225,.07) 2px,transparent 2px) 0 0/120px 100%;pointer-events:none}
 .book-in{max-width:1100px;margin:0 auto;position:relative}
 .book h2{font-family:'Shrikhand';font-weight:400;font-size:clamp(2rem,5vw,3.4rem);line-height:1}
-.book .sub{color:#a9c9b3;margin:10px 0 34px;max-width:36em}
+.book .sub{color:#a9c9b3;margin:10px 0 24px;max-width:40em}
 .days{display:flex;gap:10px;overflow-x:auto;padding:6px 4px 18px;scroll-snap-type:x proximity}
 .day{flex:0 0 auto;scroll-snap-align:start;width:78px;padding:12px 0;border-radius:16px;text-align:center;background:rgba(246,241,225,.08);border:2px solid rgba(246,241,225,.2);transition:.15s}
 .day small{display:block;font-size:.72rem;letter-spacing:.1em;text-transform:uppercase;opacity:.8}
 .day strong{display:block;font-family:'Shrikhand';font-weight:400;font-size:1.8rem;line-height:1.1}
 .day:hover{border-color:var(--ball)}
 .day.on{background:var(--ball);color:var(--deep);border-color:var(--ball);transform:translateY(-3px)}
+
+/* live selection banner inside schedule */
+.sel-banner{display:none;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;background:var(--ball);color:var(--deep);padding:12px 16px;border-radius:14px;margin:8px 0 18px;font-weight:800;font-size:.92rem;border:2px solid var(--paper)}
+.sel-banner.on{display:flex}
+.sel-banner small{font-weight:600;opacity:.85}
+
 .period{margin-top:26px}
 .period h3{font-size:.8rem;letter-spacing:.16em;text-transform:uppercase;color:var(--ball);margin-bottom:12px;display:flex;gap:12px;align-items:center}
 .period h3::after{content:"";flex:1;height:2px;background:rgba(246,241,225,.2)}
-.slots{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px}
-.slot{padding:14px 12px;border-radius:14px;background:var(--paper);color:var(--ink);text-align:left;border:2px solid transparent;position:relative;transition:.12s}
-.slot b{display:block;font-size:1.05rem}
-.slot span{font-size:.8rem;color:var(--muted)}
+.slots{display:grid;grid-template-columns:repeat(auto-fill,minmax(185px,1fr));gap:10px}
+.slot{padding:14px 13px;border-radius:14px;background:var(--paper);color:var(--ink);text-align:left;border:2px solid transparent;position:relative;transition:.12s}
+.slot b{display:block;font-size:.96rem;letter-spacing:-.01em;padding-right:18px}
+.slot span{font-size:.8rem;color:var(--muted);display:block;margin-top:2px}
 @media (hover:hover){.slot.open:hover{border-color:var(--grape);transform:translateY(-2px)}}
 .slot.sel{background:var(--grape);color:#fff;border-color:var(--ball)}
 .slot.sel span{color:#f1d6fb}
-.slot.sel::after{content:"✓";position:absolute;right:12px;top:10px;font-weight:800}
+.slot.sel::after{content:"✓";position:absolute;right:12px;top:12px;font-weight:800}
 .slot.off{background:transparent;color:rgba(246,241,225,.38);border:2px dashed rgba(246,241,225,.2);cursor:not-allowed}
 .slot.off b{text-decoration:line-through}
 .slot.off span{color:inherit}
@@ -180,8 +186,8 @@ input.bad{border-color:var(--danger)}
 table{width:100%;border-collapse:collapse;background:var(--paper);border:2px solid var(--deep);border-radius:12px;overflow:hidden;font-size:.9rem}
 th,td{padding:11px 14px;text-align:left;border-bottom:1px solid var(--line)}
 th{background:var(--deep);color:var(--cream);font-size:.75rem;letter-spacing:.1em;text-transform:uppercase}
-.blk{display:grid;grid-template-columns:repeat(auto-fill,minmax(110px,1fr));gap:8px}
-.blk button{padding:10px;border-radius:10px;border:2px solid var(--deep);background:var(--paper);font-weight:700;font-size:.85rem}
+.blk{display:grid;grid-template-columns:repeat(auto-fill,minmax(145px,1fr));gap:8px}
+.blk button{padding:10px;border-radius:10px;border:2px solid var(--deep);background:var(--paper);font-weight:700;font-size:.82rem}
 .blk button.is{background:var(--danger);color:#fff;border-color:var(--danger)}
 .blk button.bk{opacity:.4;cursor:not-allowed;background:#ddd}
 
@@ -190,16 +196,16 @@ th{background:var(--deep);color:var(--cream);font-size:.75rem;letter-spacing:.1e
 
 @media(max-width:860px){
   .hero{grid-template-columns:1fr;padding-top:36px}
-  .court-wrap{order:-1;max-width:420px}
+  .court-wrap{order:-1;max-width:300px;margin-left:6px}
   .find-in{grid-template-columns:1fr}
-  .court-wrap{max-width:300px;margin-left:6px}
   .ball{width:46px;height:46px}
   .step{grid-template-columns:44px 1fr;gap:12px}
   .step .n{font-size:2rem}
   nav a:not(.cta){display:none}
   .kpis{grid-template-columns:1fr}
   .slots{grid-template-columns:repeat(2,1fr)}
-  .slot{padding:11px 12px}
+  .slot{padding:11px 10px}
+  .slot b{font-size:.84rem}
   .book{padding:50px 5vw 70px}
   .bar{padding:10px 16px calc(10px + env(safe-area-inset-bottom));gap:12px}
   .bar .t{font-size:.9rem;line-height:1.2}
@@ -259,8 +265,15 @@ th{background:var(--deep);color:var(--cream);font-size:.75rem;letter-spacing:.1e
   <section class="book" id="book">
     <div class="book-in">
       <h2>Grab your hour.</h2>
-      <p class="sub">Slots are one hour each. Tap consecutive hours to play longer (up to <span id="maxH"></span>). Taken slots are crossed out.</p>
+      <p class="sub">Each box is <strong>1 full hour</strong> (for example, <strong>7:00 AM – 8:00 AM</strong>). Want to play 7:00 AM – 9:00 AM? Just tap the <strong>7:00 – 8:00 AM</strong> and <strong>8:00 – 9:00 AM</strong> boxes (up to <span id="maxH"></span>).</p>
       <div class="days" id="days"></div>
+
+      <!-- Live Selection Banner so players immediately see their exact start & end time -->
+      <div class="sel-banner" id="selBanner">
+        <span id="selBannerText"></span>
+        <small>Tap sticky bar below to checkout</small>
+      </div>
+
       <div id="periods"></div>
       <p class="hint">Times are Philippine time. Your slot is held for 5 minutes once you start checkout.</p>
     </div>
@@ -328,29 +341,16 @@ const CONFIG = {
   DAYS_AHEAD: 14,
   MAX_HOURS: 4,
   HOLD_SECONDS: 300,
-  // Placeholder pricing. Replace with the owner's real rates.
   PRICE: h => (h >= 17 ? 600 : 500),
   GATE_INSTRUCTIONS: "Tell the guard you're booked at The Pickle Shop and show this reference code. (Replace this with the owner's real gate instructions.)",
   RIBBON: "Soft opening promo · Book your schedule now · Pickleball for everyone · Taytay, Rizal",
   FB_URL: "https://www.facebook.com/profile.php?id=61595225496202",
-  STAFF_PIN: "1234",       // DEMO ONLY. Real staff auth must be server-side.
+  STAFF_PIN: "1234",
 
-  // DEMO = true  → bookings live in this browser only, payment is simulated.
-  // DEMO = false → talks to your backend (see api object below).
   DEMO: true,
   API_BASE: "/api"
 };
 
-/* ==========================================================
-   API LAYER — swap DEMO off when the backend exists.
-   Backend contract:
-   GET  /api/availability?date=YYYY-MM-DD → { taken:[hour,...] }
-   POST /api/checkout {date,hours,name,email,phone,method}
-        → { checkoutUrl }   (server creates PayMongo checkout w/ secret key,
-                             marks slots as held, returns hosted URL)
-   POST /api/paymongo-webhook (server only) → on paid: confirm slot,
-        send receipt + gate instructions by email.
-   ========================================================== */
 const api = {
   async availability(date){
     if(CONFIG.DEMO) return { taken: demoTaken(date) };
@@ -368,7 +368,7 @@ const api = {
     }
     const r = await fetch(`${CONFIG.API_BASE}/checkout`,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(payload)});
     if(!r.ok) throw new Error("checkout");
-    return r.json();      // { checkoutUrl }
+    return r.json();
   }
 };
 
@@ -387,8 +387,10 @@ function demoTaken(date){
 const $ = id => document.getElementById(id);
 const peso = n => "₱" + n.toLocaleString("en-PH");
 const pad = n => String(n).padStart(2,"0");
-const dkey = d => `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;   // local date, not UTC
+const dkey = d => `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
 const hLabel = h => { const s=h>=12?"PM":"AM"; const x=h%12||12; return `${x}:00 ${s}`; };
+// Explicit 1-hour slot label (e.g., "7:00 AM – 8:00 AM") so players never mistake 2 hours for 3 slots
+const slotRangeLabel = h => `${hLabel(h)} – ${hLabel(h+1)}`;
 const esc = s => String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const parseKey = k => { const [y,m,d]=k.split("-").map(Number); return new Date(y,m-1,d); };
 const longDate = k => parseKey(k).toLocaleDateString("en-PH",{weekday:"long",month:"long",day:"numeric"});
@@ -439,7 +441,7 @@ function renderSlots(){
       const b = document.createElement("button");
       b.className = "slot "+(off?"off":"open")+(sel.includes(h)?" sel":"");
       b.disabled = off;
-      b.innerHTML = `<b>${hLabel(h)}</b><span>${taken.includes(h)?"Taken":isPast(h)?"Passed":peso(CONFIG.PRICE(h))}</span>`;
+      b.innerHTML = `<b>${slotRangeLabel(h)}</b><span>${taken.includes(h)?"Taken":isPast(h)?"Passed":"1 hr · " + peso(CONFIG.PRICE(h))}</span>`;
       if(!off) b.onclick = ()=>pick(h);
       g.appendChild(b);
     }
@@ -458,10 +460,22 @@ function pick(h){
 function total(){ return sel.reduce((s,h)=>s+CONFIG.PRICE(h),0); }
 function updateBar(){
   const bar=$("bar");
-  if(!sel.length){ bar.classList.remove("show"); return; }
-  $("barT").textContent = `${shortDate(date)} · ${hasHour(sel)}`;
-  $("barD").textContent = `${sel.length} hour${sel.length>1?"s":""} · ${peso(total())}`;
+  const banner=$("selBanner");
+  if(!sel.length){
+    bar.classList.remove("show");
+    if(banner) banner.classList.remove("on");
+    return;
+  }
+  const rangeStr = hasHour(sel);
+  const hrsStr = `${sel.length} hour${sel.length>1?"s":""}`;
+  $("barT").textContent = `${shortDate(date)} · ${rangeStr}`;
+  $("barD").textContent = `${hrsStr} · ${peso(total())}`;
   bar.classList.add("show");
+
+  if(banner){
+    $("selBannerText").textContent = `Selected: ${rangeStr} (${hrsStr} · ${peso(total())})`;
+    banner.classList.add("on");
+  }
 }
 
 /* ---------- checkout drawer ---------- */
@@ -474,7 +488,7 @@ function showForm(){
   if(!sel.length) return;
   $("dTitle").textContent = "Almost yours";
   $("dBody").innerHTML = `
-    <div class="sum"><b>${longDate(date)}</b><div>${hasHour(sel)} · ${sel.length} hr${sel.length>1?"s":""}</div><small>1 private court</small></div>
+    <div class="sum"><b>${longDate(date)}</b><div>${hasHour(sel)} (${sel.length} hour${sel.length>1?"s":""})</div><small>1 private court</small></div>
     <div class="hold" id="holdMsg"></div>
     <label for="fName">Full name</label><input type="text" id="fName" autocomplete="name" placeholder="Juan Dela Cruz"><div class="err" id="eName"></div>
     <label for="fEmail">Email (receipt and gate instructions go here)</label><input type="email" id="fEmail" autocomplete="email" placeholder="juan@email.com"><div class="err" id="eEmail"></div>
@@ -485,7 +499,7 @@ function showForm(){
       <label><input type="radio" name="m" value="card"> Card</label>
     </div>`;
   $("dFoot").innerHTML = `
-    <div class="tot"><span>Total</span><span>${peso(total())}</span></div>
+    <div class="tot"><span>Total (${sel.length} hr${sel.length>1?"s":""})</span><span>${peso(total())}</span></div>
     <button class="btn" id="payGo">Pay ${peso(total())}</button>
     <div class="fine">${CONFIG.DEMO?"Demo mode: no real payment is made.":"You'll be taken to PayMongo's secure checkout."}</div>`;
   $("payGo").onclick = submit;
@@ -540,7 +554,7 @@ function showTicket(b){
         <div class="top">REF ${esc(b.ref)}</div>
         <div class="mid">
           <div><span>Date</span><b>${esc(longDate(b.date))}</b></div>
-          <div><span>Time</span><b>${esc(hasHour(b.hours))}</b></div>
+          <div><span>Time</span><b>${esc(hasHour(b.hours))} (${b.hours.length} hr${b.hours.length>1?"s":""})</b></div>
           <div><span>Paid</span><b>${peso(b.amount)} · ${b.method==="gcash"?"GCash":"Card"}</b></div>
         </div>
         <div class="gate"><b>Gate instructions</b>${esc(CONFIG.GATE_INSTRUCTIONS)}</div>
@@ -569,7 +583,7 @@ function renderStaff(){
   for(let h=CONFIG.OPEN_HOUR;h<CONFIG.CLOSE_HOUR;h++){
     const booked = db.bookings.some(b=>b.date===today&&b.status==="confirmed"&&b.hours.includes(h));
     const isB = db.blocked.includes(`${today}|${h}`);
-    blk += `<button class="${booked?"bk":isB?"is":""}" data-h="${h}" ${booked?"disabled":""}>${hLabel(h)}${isB?" · blocked":""}</button>`;
+    blk += `<button class="${booked?"bk":isB?"is":""}" data-h="${h}" ${booked?"disabled":""}>${slotRangeLabel(h)}${isB?" · blocked":""}</button>`;
   }
   $("staffIn").innerHTML = `
     <div class="top"><h2>Staff · Today</h2><button class="btn ghost" id="sClose" style="padding:10px 18px">Close</button></div>
@@ -582,7 +596,7 @@ function renderStaff(){
     <div class="blk" id="blk">${blk}</div>
     <h3>All bookings</h3>
     <table><thead><tr><th>Ref</th><th>Player</th><th>When</th><th>Paid</th></tr></thead><tbody>
-    ${all.length? all.map(b=>`<tr><td><b>${esc(b.ref)}</b></td><td>${esc(b.name)}<br><small>${esc(b.phone)}</small></td><td>${esc(b.date)}<br><small>${esc(hasHour(b.hours))}</small></td><td>${peso(b.amount)}</td></tr>`).join("") : `<tr><td colspan="4" style="color:var(--muted)">No bookings yet.</td></tr>`}
+    ${all.length? all.map(b=>`<tr><td><b>${esc(b.ref)}</b></td><td>${esc(b.name)}<br><small>${esc(b.phone)}</small></td><td>${esc(b.date)}<br><small>${esc(hasHour(b.hours))} (${b.hours.length}h)</small></td><td>${peso(b.amount)}</td></tr>`).join("") : `<tr><td colspan="4" style="color:var(--muted)">No bookings yet.</td></tr>`}
     </tbody></table>
     <p style="margin-top:18px;font-size:.8rem;color:var(--muted)">Demo panel. In production this moves behind a real login and reads from the server.</p>`;
   $("sClose").onclick = ()=>{ $("staff").classList.remove("on"); document.body.style.overflow=""; loadSlots(); };
