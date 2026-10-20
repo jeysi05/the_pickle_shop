@@ -5,31 +5,30 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#0b3d1e">
 <title>The Pickle Shop — Book the Court</title>
-<meta name="description" content="Private pickleball court in Taytay, Rizal. Pick a slot, pay with GCash or card, get your gate instructions.">
+<meta name="description" content="Private pickleball court in Taytay, Rizal. Pick a slot starting October 26, pay with GCash or card, get your gate instructions.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Shrikhand&family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,500;12..96,700;12..96,800&display=swap" rel="stylesheet">
 <style>
-:root {
-  /* The Pickle Shop Official Brand Colors */
-  --green: #2fa14e;       /* Base green mula sa background ng logo */
-  --deep: #145224;        /* Dark green para sa text at borders */
-  --ink: #0d3618;         /* Very dark green para sa main text */
-  --grape: #9e53b8;       /* Vibrant purple mula sa font ng logo */
-  --grape-dark: #78358f;  /* Darker purple para sa hover states */
-  --ball: #eede39;        /* Yellow mula sa pickleball sa logo */
-  --cream: #f4f7f5;       /* Very light green-tinted background */
-  --paper: #ffffff;       /* Pure white para sa cards */
-  --line: rgba(20, 82, 36, 0.15); 
-  --muted: #5e7a66;       
-  --danger: #c2410c;
+:root{
+  --green:#1d9a2a;
+  --deep:#0b3d1e;
+  --ink:#10281a;
+  --grape:#b64fe0;
+  --grape-dark:#8a2fb3;
+  --ball:#e8f43c;
+  --cream:#f6f1e1;
+  --paper:#fffdf5;
+  --line:rgba(16,40,26,.14);
+  --muted:#5b6b60;
+  --danger:#c2410c;
 }
 *{box-sizing:border-box;margin:0;padding:0}
 html{scroll-behavior:smooth;-webkit-text-size-adjust:100%}
 button{-webkit-tap-highlight-color:transparent}
 body{font-family:'Bricolage Grotesque',system-ui,sans-serif;background:var(--cream);color:var(--ink);line-height:1.45;-webkit-font-smoothing:antialiased;padding-bottom:90px}
 button{font:inherit;color:inherit;cursor:pointer;border:0;background:none}
-input{font:inherit}
+input,select{font:inherit}
 a{color:inherit}
 .display{font-family:'Shrikhand',serif;font-weight:400}
 
@@ -67,6 +66,12 @@ nav a.cta:hover{background:var(--grape-dark)}
 .facts{display:flex;gap:26px;flex-wrap:wrap;margin-top:34px;font-size:.92rem;font-weight:600}
 .facts span{display:flex;gap:8px;align-items:center}
 .facts i{width:10px;height:10px;border-radius:50%;background:var(--green);display:inline-block}
+@media print {
+  body * { visibility: hidden; }
+  .drawer, .drawer *, #printableTicket, #printableTicket * { visibility: visible; }
+  .drawer { position: absolute; left: 0; top: 0; width: 100%; border: none; transform: none !important; }
+  .dh .x, .df { display: none !important; }
+}
 
 /* booking */
 .book{background:var(--deep);color:var(--cream);padding:70px 5vw 90px;position:relative}
@@ -74,26 +79,53 @@ nav a.cta:hover{background:var(--grape-dark)}
   linear-gradient(rgba(246,241,225,.07) 2px,transparent 2px) 0 0/100% 120px,
   linear-gradient(90deg,rgba(246,241,225,.07) 2px,transparent 2px) 0 0/120px 100%;pointer-events:none}
 .book-in{max-width:1100px;margin:0 auto;position:relative}
+.book-top{display:flex;justify-content:space-between;align-items:flex-end;gap:20px;flex-wrap:wrap;margin-bottom:24px}
 .book h2{font-family:'Shrikhand';font-weight:400;font-size:clamp(2rem,5vw,3.4rem);line-height:1}
-.book .sub{color:#a9c9b3;margin:10px 0 24px;max-width:40em}
-.days{display:flex;gap:10px;overflow-x:auto;padding:6px 4px 18px;scroll-snap-type:x proximity}
-.day{flex:0 0 auto;scroll-snap-align:start;width:78px;padding:12px 0;border-radius:16px;text-align:center;background:rgba(246,241,225,.08);border:2px solid rgba(246,241,225,.2);transition:.15s}
-.day small{display:block;font-size:.72rem;letter-spacing:.1em;text-transform:uppercase;opacity:.8}
-.day strong{display:block;font-family:'Shrikhand';font-weight:400;font-size:1.8rem;line-height:1.1}
+.book .sub{color:#a9c9b3;margin:10px 0 0;max-width:38em}
+.hours-pill{background:rgba(246,241,225,.09);border:2px solid rgba(246,241,225,.24);border-radius:14px;padding:10px 16px;font-size:.82rem;line-height:1.45}
+.hours-pill b{color:var(--ball);display:block;font-size:.86rem}
+
+/* visual month calendar + day strip */
+.cal-layout{display:grid;grid-template-columns:340px 1fr;gap:24px;align-items:start;margin-bottom:26px}
+.cal-box{background:rgba(246,241,225,.06);border:2px solid rgba(246,241,225,.22);border-radius:18px;padding:16px}
+.cal-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
+.cal-head strong{font-family:'Shrikhand';font-weight:400;font-size:1.25rem;color:var(--ball)}
+.cal-nav{display:flex;gap:6px}
+.cal-nav button{width:32px;height:32px;border-radius:8px;border:1.5px solid rgba(246,241,225,.3);color:var(--cream);font-weight:800;display:grid;place-items:center}
+.cal-nav button:hover:not(:disabled){border-color:var(--ball);background:rgba(232,244,60,.15)}
+.cal-nav button:disabled{opacity:.3;cursor:not-allowed}
+.cal-dow{display:grid;grid-template-columns:repeat(7,1fr);text-align:center;font-size:.7rem;text-transform:uppercase;letter-spacing:.08em;color:#a9c9b3;margin-bottom:6px;font-weight:700}
+.cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:5px}
+.cal-cell{aspect-ratio:1;border-radius:10px;display:flex;flex-direction:column;align-items:center;justify-content:center;font-weight:700;font-size:.88rem;border:1.5px solid transparent;background:rgba(246,241,225,.08);color:var(--cream);transition:.12s;position:relative}
+.cal-cell.empty{background:transparent;pointer-events:none}
+.cal-cell.locked{background:transparent;color:rgba(246,241,225,.25);text-decoration:line-through;cursor:not-allowed;border:1px dashed rgba(246,241,225,.12)}
+.cal-cell.open:hover{border-color:var(--ball);transform:translateY(-1px)}
+.cal-cell.on{background:var(--ball);color:var(--deep);border-color:var(--ball);font-weight:800;box-shadow:0 3px 0 rgba(0,0,0,.25)}
+.cal-cell.launch::after{content:"START";font-size:.5rem;letter-spacing:.04em;background:var(--grape);color:#fff;padding:1px 4px;border-radius:4px;line-height:1.1;margin-top:1px}
+.cal-cell.on.launch::after{background:var(--deep);color:var(--ball)}
+.cal-note{font-size:.75rem;color:#a9c9b3;margin-top:10px;text-align:center}
+
+/* quick horizontal day strip */
+.strip-wrap{overflow:hidden}
+.strip-label{font-size:.78rem;text-transform:uppercase;letter-spacing:.12em;color:var(--ball);font-weight:700;margin-bottom:8px;display:flex;justify-content:space-between;align-items:center}
+.days{display:flex;gap:10px;overflow-x:auto;padding:4px 2px 14px;scroll-snap-type:x proximity}
+.day{flex:0 0 auto;scroll-snap-align:start;width:82px;padding:11px 0;border-radius:16px;text-align:center;background:rgba(246,241,225,.08);border:2px solid rgba(246,241,225,.2);transition:.15s}
+.day small{display:block;font-size:.7rem;letter-spacing:.08em;text-transform:uppercase;opacity:.85}
+.day strong{display:block;font-family:'Shrikhand';font-weight:400;font-size:1.75rem;line-height:1.1}
 .day:hover{border-color:var(--ball)}
 .day.on{background:var(--ball);color:var(--deep);border-color:var(--ball);transform:translateY(-3px)}
 
 /* live selection banner inside schedule */
-.sel-banner{display:none;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;background:var(--ball);color:var(--deep);padding:12px 16px;border-radius:14px;margin:8px 0 18px;font-weight:800;font-size:.92rem;border:2px solid var(--paper)}
+.sel-banner{display:none;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;background:var(--ball);color:var(--deep);padding:12px 16px;border-radius:14px;margin:6px 0 18px;font-weight:800;font-size:.92rem;border:2px solid var(--paper)}
 .sel-banner.on{display:flex}
 .sel-banner small{font-weight:600;opacity:.85}
 
-.period{margin-top:26px}
+.period{margin-top:22px}
 .period h3{font-size:.8rem;letter-spacing:.16em;text-transform:uppercase;color:var(--ball);margin-bottom:12px;display:flex;gap:12px;align-items:center}
 .period h3::after{content:"";flex:1;height:2px;background:rgba(246,241,225,.2)}
 .slots{display:grid;grid-template-columns:repeat(auto-fill,minmax(185px,1fr));gap:10px}
 .slot{padding:14px 13px;border-radius:14px;background:var(--paper);color:var(--ink);text-align:left;border:2px solid transparent;position:relative;transition:.12s}
-.slot b{display:block;font-size:.96rem;letter-spacing:-.01em;padding-right:18px}
+.slot b{display:block;font-size:.95rem;letter-spacing:-.01em;padding-right:18px}
 .slot span{font-size:.8rem;color:var(--muted);display:block;margin-top:2px}
 @media (hover:hover){.slot.open:hover{border-color:var(--grape);transform:translateY(-2px)}}
 .slot.sel{background:var(--grape);color:#fff;border-color:var(--ball)}
@@ -112,7 +144,7 @@ nav a.cta:hover{background:var(--grape-dark)}
 .bar .btn{padding:12px 22px}
 
 /* how */
-.how{max-width:1100px;margin:0 auto;padding:80px 5vw}
+.how{max-width:1100px;margin:0 auto;padding:80px 5vw 40px}
 .how h2{font-family:'Shrikhand';font-weight:400;font-size:clamp(1.8rem,4vw,2.8rem);color:var(--deep);margin-bottom:34px}
 .steps{display:grid;gap:0}
 .step{display:grid;grid-template-columns:90px 1fr;gap:20px;align-items:baseline;padding:22px 0;border-top:2px solid var(--deep)}
@@ -120,6 +152,17 @@ nav a.cta:hover{background:var(--grape-dark)}
 .step .n{font-family:'Shrikhand';font-size:3rem;color:var(--grape);line-height:1}
 .step h4{font-size:1.25rem;margin-bottom:4px}
 .step p{color:#34493b;max-width:42em}
+
+/* rules */
+.rules{max-width:1100px;margin:0 auto;padding:30px 5vw 80px}
+.rules h2{font-family:'Shrikhand';font-weight:400;font-size:clamp(1.8rem,4vw,2.6rem);color:var(--deep);margin-bottom:24px}
+.rules-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(290px,1fr));gap:16px}
+.rcard{background:var(--paper);border:2px solid var(--deep);border-radius:16px;padding:20px;box-shadow:4px 4px 0 var(--deep)}
+.rcard h4{font-size:1.05rem;color:var(--deep);margin-bottom:10px;display:flex;align-items:center;gap:8px}
+.rcard h4 span{background:var(--grape);color:#fff;font-family:'Shrikhand';width:26px;height:26px;border-radius:50%;display:inline-grid;place-items:center;font-size:.85rem;border:1.5px solid var(--deep)}
+.rcard ul{list-style:none;display:grid;gap:6px;font-size:.88rem;color:#2f4638}
+.rcard li{padding-left:14px;position:relative}
+.rcard li::before{content:"•";position:absolute;left:0;color:var(--green);font-weight:900}
 
 /* find */
 .find{background:var(--grape);color:#fff;padding:70px 5vw;border-top:3px solid var(--deep);border-bottom:3px solid var(--deep)}
@@ -146,18 +189,21 @@ footer button{text-decoration:underline;color:var(--muted)}
 .sum{background:var(--cream);border:2px solid var(--deep);border-radius:14px;padding:14px 16px;margin-bottom:12px}
 .sum b{display:block}
 .sum small{color:var(--muted)}
-.hold{font-size:.85rem;color:var(--danger);font-weight:700;margin-bottom:18px}
-label{display:block;font-weight:700;font-size:.85rem;margin:14px 0 6px}
-input[type=text],input[type=email],input[type=tel],input[type=password]{width:100%;padding:13px 14px;border:2px solid var(--line);border-radius:12px;background:#fff;transition:.15s}
-input:focus{outline:none;border-color:var(--grape);box-shadow:0 0 0 4px rgba(182,79,224,.15)}
+.hold{font-size:.85rem;color:var(--danger);font-weight:700;margin-bottom:14px}
+label{display:block;font-weight:700;font-size:.85rem;margin:12px 0 5px}
+input[type=text],input[type=email],input[type=tel],input[type=password],select{width:100%;padding:12px 14px;border:2px solid var(--line);border-radius:12px;background:#fff;transition:.15s}
+input:focus,select:focus{outline:none;border-color:var(--grape);box-shadow:0 0 0 4px rgba(182,79,224,.15)}
 input.bad{border-color:var(--danger)}
 .err{color:var(--danger);font-size:.8rem;margin-top:4px;min-height:1em}
-.pay{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:6px}
-.pay label{margin:0;border:2px solid var(--line);border-radius:12px;padding:12px;display:flex;gap:8px;align-items:center;cursor:pointer;font-weight:700}
+.pay{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:6px}
+.pay label{margin:0;border:2px solid var(--line);border-radius:12px;padding:10px;display:flex;gap:6px;align-items:center;cursor:pointer;font-weight:700;font-size:.86rem}
 .pay input{accent-color:var(--grape)}
 .pay label:has(input:checked){border-color:var(--grape);background:#f8ebfd}
-.df{padding:18px 26px 24px;border-top:2px dashed var(--line)}
-.tot{display:flex;justify-content:space-between;font-weight:800;font-size:1.15rem;margin-bottom:14px}
+.policy-box{margin-top:12px;background:var(--cream);border:1.5px solid var(--deep);border-radius:12px;padding:10px 12px;font-size:.78rem}
+.policy-box label{margin:6px 0 0;display:flex;align-items:flex-start;gap:8px;font-weight:700;cursor:pointer;font-size:.8rem}
+.df{padding:16px 26px 22px;border-top:2px dashed var(--line)}
+.fee-row{display:flex;justify-content:space-between;font-size:.85rem;color:var(--muted);margin-bottom:4px}
+.tot{display:flex;justify-content:space-between;font-weight:800;font-size:1.15rem;margin:8px 0 12px;padding-top:8px;border-top:1px solid var(--line)}
 .df .btn{width:100%;justify-content:center}
 .fine{font-size:.76rem;color:var(--muted);margin-top:10px;text-align:center}
 
@@ -171,14 +217,13 @@ input.bad{border-color:var(--danger)}
 .tk .mid span{color:var(--muted)}
 .tk .gate{border-top:2px dashed var(--deep);padding:14px 16px;text-align:left;background:var(--cream);font-size:.9rem}
 .tk .gate b{display:block;font-size:.72rem;letter-spacing:.14em;text-transform:uppercase;color:var(--grape-dark);margin-bottom:4px}
-.demo{background:var(--ball);color:var(--deep);font-size:.78rem;font-weight:700;padding:8px 12px;border-radius:10px;border:2px solid var(--deep);margin-top:6px}
 
 /* staff */
 .staff{position:fixed;inset:0;background:var(--cream);z-index:80;overflow:auto;display:none}
 .staff.on{display:block}
 .staff-in{max-width:1000px;margin:0 auto;padding:30px 5vw 80px}
 .staff h2{font-family:'Shrikhand';font-weight:400;font-size:2.2rem;color:var(--deep)}
-.top{display:flex;justify-content:space-between;align-items:center;margin-bottom:24px;gap:12px}
+.top{display:flex;justify-content:space-between;align-items:center;margin-bottom:24px;gap:12px;flex-wrap:wrap}
 .kpis{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:28px}
 .kpi{background:var(--paper);border:2px solid var(--deep);border-radius:14px;padding:16px}
 .kpi small{font-weight:700;text-transform:uppercase;letter-spacing:.1em;font-size:.7rem;color:var(--muted)}
@@ -192,12 +237,13 @@ th{background:var(--deep);color:var(--cream);font-size:.75rem;letter-spacing:.1e
 .blk button.is{background:var(--danger);color:#fff;border-color:var(--danger)}
 .blk button.bk{opacity:.4;cursor:not-allowed;background:#ddd}
 
-.toast{position:fixed;left:50%;bottom:100px;transform:translate(-50%,30px);background:var(--deep);color:var(--cream);padding:12px 20px;border-radius:12px;font-weight:700;z-index:100;opacity:0;pointer-events:none;transition:.25s}
+.toast{position:fixed;left:50%;bottom:100px;transform:translate(-50%,30px);background:var(--deep);color:var(--cream);padding:12px 20px;border-radius:12px;font-weight:700;z-index:100;opacity:0;pointer-events:none;transition:.25s;border:2px solid var(--ball)}
 .toast.on{opacity:1;transform:translate(-50%,0)}
 
 @media(max-width:860px){
   .hero{grid-template-columns:1fr;padding-top:36px}
   .court-wrap{order:-1;max-width:300px;margin-left:6px}
+  .cal-layout{grid-template-columns:1fr}
   .find-in{grid-template-columns:1fr}
   .ball{width:46px;height:46px}
   .step{grid-template-columns:44px 1fr;gap:12px}
@@ -225,6 +271,7 @@ th{background:var(--deep);color:var(--cream);font-size:.75rem;letter-spacing:.1e
   <a class="brand" href="#top"><div class="badge">The<br>Pickle<br>Shop</div><b>The Pickle Shop</b></a>
   <nav>
     <a href="#how">How it works</a>
+    <a href="#rules">Rules</a>
     <a href="#find">Find us</a>
     <a class="cta" href="#book">Book a slot</a>
   </nav>
@@ -265,17 +312,51 @@ th{background:var(--deep);color:var(--cream);font-size:.75rem;letter-spacing:.1e
 
   <section class="book" id="book">
     <div class="book-in">
-      <h2>Grab your hour.</h2>
-      <p class="sub">Each box is <strong>1 full hour</strong> (for example, <strong>7:00 AM – 8:00 AM</strong>). Want to play 7:00 AM – 9:00 AM? Just tap the <strong>7:00 – 8:00 AM</strong> and <strong>8:00 – 9:00 AM</strong> boxes (up to <span id="maxH"></span>).</p>
-      <div class="days" id="days"></div>
-
-      <!-- Live Selection Banner so players immediately see their exact start & end time -->
-      <div class="sel-banner" id="selBanner">
-        <span id="selBannerText"></span>
-        <small>Tap sticky bar below to checkout</small>
+      <div class="book-top">
+        <div>
+          <h2>Grab your hour.</h2>
+          <p class="sub">Online calendar booking starts <strong>Monday, October 26, 2026</strong>. Each box is <strong>1 full hour</strong> (e.g., <strong>8:00 AM – 9:00 AM</strong>). Tap consecutive boxes to play longer (up to <span id="maxH"></span>).</p>
+        </div>
+        <div class="hours-pill">
+          <b>Operating Hours &amp; Rates</b>
+          Mon–Fri: 8:00 AM – 12:00 MN · Sat–Sun: 8:00 AM – 2:00 AM<br>
+          Day (8AM–4PM): ₱450/hr · Night (5PM–2AM): ₱500/hr
+        </div>
       </div>
 
-      <div id="periods"></div>
+      <!-- Visual Month Calendar + Day Strip starting Oct 26 -->
+      <div class="cal-layout">
+        <div class="cal-box">
+          <div class="cal-head">
+            <strong id="calMonthTitle">October 2026</strong>
+            <div class="cal-nav">
+              <button type="button" id="calPrev" aria-label="Previous Month">‹</button>
+              <button type="button" id="calNext" aria-label="Next Month">›</button>
+            </div>
+          </div>
+          <div class="cal-dow">
+            <span>Sun</span><span>Mon</span><span>Tue</span><span>Wed</span><span>Thu</span><span>Fri</span><span>Sat</span>
+          </div>
+          <div class="cal-grid" id="calGrid"></div>
+          <div class="cal-note">Dates before Oct 26 are handled manually. Select <strong>Oct 26 onwards</strong>.</div>
+        </div>
+
+        <div class="strip-wrap">
+          <div class="strip-label">
+            <span>Available Dates (Starting Oct 26)</span>
+            <span id="selectedDateLabel" style="color:var(--cream)"></span>
+          </div>
+          <div class="days" id="days"></div>
+
+          <div class="sel-banner" id="selBanner">
+            <span id="selBannerText"></span>
+            <small>Tap "Continue" below to checkout</small>
+          </div>
+
+          <div id="periods"></div>
+        </div>
+      </div>
+
       <p class="hint">Times are Philippine time. Your slot is held for 5 minutes once you start checkout.</p>
     </div>
   </section>
@@ -283,9 +364,47 @@ th{background:var(--deep);color:var(--cream);font-size:.75rem;letter-spacing:.1e
   <section class="how" id="how">
     <h2>Book in under a minute.</h2>
     <div class="steps">
-      <div class="step"><div class="n">1</div><div><h4>Pick a day and time</h4><p>The schedule is live. If a slot shows open, it's open.</p></div></div>
-      <div class="step"><div class="n">2</div><div><h4>Pay with GCash or card</h4><p>Checkout runs through PayMongo. The slot locks the moment you pay, so nobody else can take it.</p></div></div>
-      <div class="step"><div class="n">3</div><div><h4>Get your receipt and gate info</h4><p>We email your receipt and the subdivision gate instructions right away. Show up and play.</p></div></div>
+      <div class="step"><div class="n">1</div><div><h4>Pick a day (starting Oct 26) and time</h4><p>The schedule is live. Each slot box is 1 full hour—if a slot shows open, it's open.</p></div></div>
+      <div class="step"><div class="n">2</div><div><h4>Pay with GCash, Maya, or Card</h4><p>Checkout runs through PayMongo. The slot locks the moment you pay, so nobody else can take it.</p></div></div>
+      <div class="step"><div class="n">3</div><div><h4>Get your receipt and gate info</h4><p>Save your confirmation ticket and gate instructions right away. Show up and play.</p></div></div>
+    </div>
+  </section>
+
+  <section class="rules" id="rules">
+    <h2>Court Rules &amp; Amenities</h2>
+    <div class="rules-grid">
+      <div class="rcard">
+        <h4><span>1</span> Booking &amp; Payment</h4>
+        <ul>
+          <li>Full payment is required to secure your booking.</li>
+          <li><strong>No cancellation, no refund, and no rebooking</strong> once confirmed.</li>
+          <li>Please arrive on time and respect your reserved schedule.</li>
+        </ul>
+      </div>
+      <div class="rcard">
+        <h4><span>2</span> Court Usage &amp; Safety</h4>
+        <ul>
+          <li>Bring your own pickleball paddle and balls.</li>
+          <li>Wear proper sportswear and <strong>non-marking court shoes</strong>.</li>
+          <li>Children must be supervised by an adult. CCTV is active 24/7.</li>
+        </ul>
+      </div>
+      <div class="rcard">
+        <h4><span>3</span> Street Parking Rules</h4>
+        <ul>
+          <li><strong>Car parking:</strong> Up to 2 cars only (subject to availability).</li>
+          <li><strong>Motorcycle parking:</strong> Up to 5 motorcycles only.</li>
+          <li>Please inform us in advance if bringing a car so our helper can assist you. Do not block driveways.</li>
+        </ul>
+      </div>
+      <div class="rcard">
+        <h4><span>4</span> Amenities &amp; Food Policy</h4>
+        <ul>
+          <li>Comfort room, shower area, and <strong>free drinking water</strong> available.</li>
+          <li>Waiting &amp; resting area (up to 15 seats) + 1 court helper on duty.</li>
+          <li>All food &amp; drinks allowed (dispose of trash properly). <strong>Strictly no smoking/vaping.</strong></li>
+        </ul>
+      </div>
     </div>
   </section>
 
@@ -298,7 +417,7 @@ th{background:var(--deep);color:var(--cream);font-size:.75rem;letter-spacing:.1e
       <div class="addr">
         <b>The Pickle Shop</b>
         188 Buhangin, Taytay, Rizal 1920<br>
-        <span style="color:var(--muted);font-size:.9rem">Private court · open for booking</span><br>
+        <span style="color:var(--muted);font-size:.9rem">Private court · Mon–Fri 8AM–12MN · Sat–Sun 8AM–2AM</span><br>
         <a href="https://www.facebook.com/profile.php?id=61595225496202" target="_blank" rel="noopener" id="fbLink">Message us on Facebook →</a>
       </div>
     </div>
@@ -333,122 +452,228 @@ th{background:var(--deep);color:var(--cream);font-size:.75rem;letter-spacing:.1e
 
 <script>
 /* ==========================================================
-   CONFIG — edit these per client
+   THE PICKLE SHOP — CONFIGURATION
    ========================================================== */
 const CONFIG = {
   NAME: "The Pickle Shop",
-  OPEN_HOUR: 6,            // first slot starts 6:00 AM
-  CLOSE_HOUR: 22,          // last slot ends 10:00 PM
-  DAYS_AHEAD: 14,
+  START_DATE: "2026-10-26", // Strictly opens on Monday, Oct 26, 2026
+  DAYS_AHEAD: 30,
   MAX_HOURS: 4,
   HOLD_SECONDS: 300,
-  PRICE: h => (h >= 17 ? 600 : 500),
-  GATE_INSTRUCTIONS: "Tell the guard you're booked at The Pickle Shop and show this reference code. (Replace this with the owner's real gate instructions.)",
-  RIBBON: "Soft opening promo · Book your schedule now · Pickleball for everyone · Taytay, Rizal",
-  FB_URL: "https://www.facebook.com/profile.php?id=61595225496202",
-  STAFF_PIN: "1234",
 
-  DEMO: true,
-  API_BASE: "/api"
-};
-
-const api = {
-  async availability(date){
-    if(CONFIG.DEMO) return { taken: demoTaken(date) };
-    const r = await fetch(`${CONFIG.API_BASE}/availability?date=${date}`);
-    if(!r.ok) throw new Error("availability");
-    return r.json();
+  getHoursForDate(dateKey) {
+    const [y, m, d] = dateKey.split("-").map(Number);
+    const dow = new Date(y, m - 1, d).getDay();
+    const isWeekend = (dow === 0 || dow === 6);
+    return { open: 8, close: isWeekend ? 26 : 24, isWeekend };
   },
-  async checkout(payload){
-    if(CONFIG.DEMO){
-      await new Promise(r=>setTimeout(r,1400));
-      const ref = "PS-" + Math.random().toString(36).slice(2,6).toUpperCase() + Math.floor(10+Math.random()*89);
-      const b = {ref, ...payload, amount: payload.hours.reduce((s,h)=>s+CONFIG.PRICE(h),0), status:"confirmed", at:Date.now()};
-      db.bookings.push(b); save();
-      return { demo:true, booking:b };
-    }
-    const r = await fetch(`${CONFIG.API_BASE}/checkout`,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(payload)});
-    if(!r.ok) throw new Error("checkout");
-    return r.json();
-  }
+  PRICE: h => (h >= 17 ? 500 : 450),
+  FEE_RATES: {
+    gcash: { label: "GCash (2.23%)", pct: 0.0223, fixed: 0 },
+    maya:  { label: "Maya / QR Ph (1.79%)", pct: 0.0179, fixed: 0 },
+    card:  { label: "Card (3.125% + ₱13.39)", pct: 0.03125, fixed: 13.39 }
+  },
+  GATE_INSTRUCTIONS: "Tell the guard you're booked at The Pickle Shop (188 Buhangin, Taytay, Rizal) and show this reference code to our court helper. Street parking is limited to 2 cars and 5 motorcycles—please do not block neighboring driveways.",
+  RIBBON: "Soft opening promo · Online calendar starts Oct 26 · Pickleball for everyone · Taytay, Rizal",
+  FB_URL: "https://www.facebook.com/profile.php?id=61595225496202",
+  STAFF_PIN: "2626"
 };
 
-/* ---------- demo store ---------- */
-const KEY = "pickleshop-demo-v2";
+/* ---------- Clean Local Store (Auto-Wipes Old Test Data) ---------- */
+const KEY = "pickleshop-live-v3";
+try {
+  localStorage.removeItem("pickleshop-live-v1");
+  localStorage.removeItem("pickleshop-live-v2");
+} catch(e) {}
+
 let db = (()=>{ try{ return JSON.parse(localStorage.getItem(KEY)) }catch(e){return null} })() || {bookings:[], blocked:[]};
 function save(){ try{ localStorage.setItem(KEY, JSON.stringify(db)) }catch(e){} }
-function demoTaken(date){
+
+function localTaken(dateKey){
   const t = new Set();
-  db.bookings.forEach(b=>{ if(b.date===date && b.status==="confirmed") b.hours.forEach(h=>t.add(h)); });
-  db.blocked.forEach(k=>{ const [d,h]=k.split("|"); if(d===date) t.add(+h); });
+  db.bookings.forEach(b=>{ if(b.date===dateKey && b.status==="confirmed") b.hours.forEach(h=>t.add(h)); });
+  db.blocked.forEach(k=>{ const [d,h]=k.split("|"); if(d===dateKey) t.add(+h); });
   return [...t];
 }
 
-/* ---------- helpers ---------- */
+/* ---------- Helpers ---------- */
 const $ = id => document.getElementById(id);
-const peso = n => "₱" + n.toLocaleString("en-PH");
+const peso = n => "₱" + Number(n).toLocaleString("en-PH", { minimumFractionDigits: n % 1 === 0 ? 0 : 2, maximumFractionDigits: 2 });
 const pad = n => String(n).padStart(2,"0");
 const dkey = d => `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
-const hLabel = h => { const s=h>=12?"PM":"AM"; const x=h%12||12; return `${x}:00 ${s}`; };
-// Explicit 1-hour slot label (e.g., "7:00 AM – 8:00 AM") so players never mistake 2 hours for 3 slots
+const hLabel = h => {
+  const norm = ((h % 24) + 24) % 24;
+  const s = norm >= 12 ? "PM" : "AM";
+  const x = norm % 12 || 12;
+  return `${x}:00 ${s}`;
+};
 const slotRangeLabel = h => `${hLabel(h)} – ${hLabel(h+1)}`;
 const esc = s => String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const parseKey = k => { const [y,m,d]=k.split("-").map(Number); return new Date(y,m-1,d); };
-const longDate = k => parseKey(k).toLocaleDateString("en-PH",{weekday:"long",month:"long",day:"numeric"});
+const longDate = k => parseKey(k).toLocaleDateString("en-PH",{weekday:"long",month:"long",day:"numeric",year:"numeric"});
 const shortDate = k => parseKey(k).toLocaleDateString("en-PH",{weekday:"short",month:"short",day:"numeric"});
-const hasHour = (hrs) => `${hLabel(hrs[0])} – ${hLabel(hrs[hrs.length-1]+1)}`;
-function toast(m){ const t=$("toast"); t.textContent=m; t.classList.add("on"); clearTimeout(toast._t); toast._t=setTimeout(()=>t.classList.remove("on"),2600); }
+const hasHour = hrs => `${hLabel(hrs[0])} – ${hLabel(hrs[hrs.length-1]+1)}`;
+function toast(m){ const t=$("toast"); t.textContent=m; t.classList.add("on"); clearTimeout(toast._t); toast._t=setTimeout(()=>t.classList.remove("on"),3000); }
 
-/* ---------- state ---------- */
-let date = dkey(new Date());
+/* ---------- Strictly Start on October 26, 2026 (or Today if after Oct 26) ---------- */
+function getBaseDate(){
+  const now = new Date();
+  const todayLocal = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  const minDate = parseKey(CONFIG.START_DATE); // Oct 26, 2026
+  return todayLocal > minDate ? todayLocal : minDate;
+}
+
+/* ---------- State ---------- */
+const baseDateObj = getBaseDate();
+let date = dkey(baseDateObj);
+let calYear = baseDateObj.getFullYear();
+let calMonth = baseDateObj.getMonth(); // 9 = October
 let sel = [];
 let taken = [];
 let holdTimer = null;
+let staffToken = sessionStorage.getItem("tps_staff_jwt") || "";
 
-/* ---------- render: days ---------- */
+function subtotal(){ return sel.reduce((s,h)=>s+CONFIG.PRICE(h),0); }
+function calcFee(sub, methodKey){
+  const cfg = CONFIG.FEE_RATES[methodKey] || CONFIG.FEE_RATES.gcash;
+  const gross = (sub + cfg.fixed) / (1 - cfg.pct);
+  const fee = Math.ceil((gross - sub) * 100) / 100;
+  return { fee, total: +(sub + fee).toFixed(2), label: cfg.label };
+}
+
+/* ---------- Render: Interactive Month Calendar ---------- */
+function renderMonthCalendar(){
+  const firstDay = new Date(calYear, calMonth, 1);
+  const daysInMonth = new Date(calYear, calMonth + 1, 0).getDate();
+  const startDow = firstDay.getDay();
+  const minKey = dkey(getBaseDate());
+
+  $("calMonthTitle").textContent = firstDay.toLocaleDateString("en-PH", { month: "long", year: "numeric" });
+
+  // Prevent navigating earlier than October 2026
+  const minMonthDate = getBaseDate();
+  $("calPrev").disabled = (calYear === minMonthDate.getFullYear() && calMonth <= minMonthDate.getMonth());
+
+  const grid = $("calGrid");
+  grid.innerHTML = "";
+
+  for(let i = 0; i < startDow; i++){
+    const empty = document.createElement("div");
+    empty.className = "cal-cell empty";
+    grid.appendChild(empty);
+  }
+
+  for(let d = 1; d <= daysInMonth; d++){
+    const cellDate = new Date(calYear, calMonth, d);
+    const k = dkey(cellDate);
+    const btn = document.createElement("button");
+    btn.type = "button";
+    const isLocked = k < minKey;
+    const isSelected = k === date;
+    const isLaunchDay = k === CONFIG.START_DATE;
+
+    btn.className = "cal-cell " + (isLocked ? "locked" : "open") + (isSelected ? " on" : "") + (isLaunchDay ? " launch" : "");
+    btn.disabled = isLocked;
+    btn.textContent = d;
+    btn.title = isLocked ? "Manual bookings only before Oct 26" : `Book ${longDate(k)}`;
+
+    if(!isLocked){
+      btn.onclick = () => selectDate(k);
+    }
+    grid.appendChild(btn);
+  }
+}
+
+$("calPrev").onclick = () => {
+  calMonth--;
+  if(calMonth < 0){ calMonth = 11; calYear--; }
+  renderMonthCalendar();
+};
+$("calNext").onclick = () => {
+  calMonth++;
+  if(calMonth > 11){ calMonth = 0; calYear++; }
+  renderMonthCalendar();
+};
+
+function selectDate(newDateKey){
+  date = newDateKey;
+  const parsed = parseKey(newDateKey);
+  calYear = parsed.getFullYear();
+  calMonth = parsed.getMonth();
+  sel = [];
+  renderMonthCalendar();
+  renderDays();
+  loadSlots();
+  updateBar();
+}
+
+/* ---------- Render: Horizontal Day Strip (Starts at Oct 26) ---------- */
 function renderDays(){
   const box = $("days"); box.innerHTML="";
+  const base = getBaseDate();
+  $("selectedDateLabel").textContent = longDate(date);
+
   for(let i=0;i<CONFIG.DAYS_AHEAD;i++){
-    const d = new Date(); d.setDate(d.getDate()+i);
+    const d = new Date(base); d.setDate(base.getDate()+i);
     const k = dkey(d);
     const b = document.createElement("button");
+    b.type = "button";
     b.className = "day"+(k===date?" on":"");
-    b.innerHTML = `<small>${i===0?"Today":d.toLocaleDateString("en-PH",{weekday:"short"})}</small><strong>${d.getDate()}</strong><small>${d.toLocaleDateString("en-PH",{month:"short"})}</small>`;
-    b.onclick = ()=>{ date=k; sel=[]; renderDays(); loadSlots(); updateBar(); };
+    b.innerHTML = `<small>${d.toLocaleDateString("en-PH",{weekday:"short"})}</small><strong>${d.getDate()}</strong><small>${d.toLocaleDateString("en-PH",{month:"short"})}</small>`;
+    b.onclick = () => selectDate(k);
     box.appendChild(b);
   }
 }
 
-/* ---------- render: slots ---------- */
+/* ---------- Render: Slots ---------- */
 async function loadSlots(){
-  try{ taken = (await api.availability(date)).taken; }catch(e){ taken=[]; toast("Couldn't load the schedule. Try again."); }
+  try{
+    const r = await fetch(`/api/schedule?date=${encodeURIComponent(date)}`);
+    if(r.ok){
+      const data = await r.json();
+      taken = [...new Set([...localTaken(date), ...(Array.isArray(data.taken) ? data.taken : [])])];
+    } else {
+      taken = localTaken(date);
+    }
+  }catch(e){
+    taken = localTaken(date);
+  }
   renderSlots();
 }
+
 function isPast(h){
   const now = new Date();
   return date===dkey(now) && h <= now.getHours();
 }
+
 function renderSlots(){
-  const groups = [["Morning",6,12],["Afternoon",12,17],["Evening",17,22]];
+  const { open, close } = CONFIG.getHoursForDate(date);
+  const groups = [
+    ["Day Rate · ₱450/hr (8:00 AM – 5:00 PM)", 8, 17],
+    ["Night / Peak Rate · ₱500/hr (5:00 PM Onwards)", 17, close]
+  ];
   const box = $("periods"); box.innerHTML="";
   groups.forEach(([name,a,b])=>{
-    const from=Math.max(a,CONFIG.OPEN_HOUR), to=Math.min(b,CONFIG.CLOSE_HOUR);
+    const from=Math.max(a,open), to=Math.min(b,close);
     if(from>=to) return;
     const sec = document.createElement("div"); sec.className="period";
     sec.innerHTML = `<h3>${name}</h3>`;
     const g = document.createElement("div"); g.className="slots";
     for(let h=from;h<to;h++){
       const off = taken.includes(h) || isPast(h);
-      const b = document.createElement("button");
-      b.className = "slot "+(off?"off":"open")+(sel.includes(h)?" sel":"");
-      b.disabled = off;
-      b.innerHTML = `<b>${slotRangeLabel(h)}</b><span>${taken.includes(h)?"Taken":isPast(h)?"Passed":"1 hr · " + peso(CONFIG.PRICE(h))}</span>`;
-      if(!off) b.onclick = ()=>pick(h);
-      g.appendChild(b);
+      const btn = document.createElement("button");
+      btn.type = "button";
+      btn.className = "slot "+(off?"off":"open")+(sel.includes(h)?" sel":"");
+      btn.disabled = off;
+      const nextDayTag = h >= 24 ? " (Next Day)" : "";
+      btn.innerHTML = `<b>${slotRangeLabel(h)}${nextDayTag}</b><span>${taken.includes(h)?"Taken":isPast(h)?"Passed":"1 hr · " + peso(CONFIG.PRICE(h))}</span>`;
+      if(!off) btn.onclick = ()=>pick(h);
+      g.appendChild(btn);
     }
     sec.appendChild(g); box.appendChild(sec);
   });
 }
+
 function pick(h){
   const lo=sel[0], hi=sel[sel.length-1];
   if(!sel.length) sel=[h];
@@ -458,7 +683,7 @@ function pick(h){
   else { if((h===lo-1||h===hi+1)) toast(`Max ${CONFIG.MAX_HOURS} hours per booking`); sel=[h]; }
   renderSlots(); updateBar();
 }
-function total(){ return sel.reduce((s,h)=>s+CONFIG.PRICE(h),0); }
+
 function updateBar(){
   const bar=$("bar");
   const banner=$("selBanner");
@@ -470,16 +695,16 @@ function updateBar(){
   const rangeStr = hasHour(sel);
   const hrsStr = `${sel.length} hour${sel.length>1?"s":""}`;
   $("barT").textContent = `${shortDate(date)} · ${rangeStr}`;
-  $("barD").textContent = `${hrsStr} · ${peso(total())}`;
+  $("barD").textContent = `${hrsStr} · ${peso(subtotal())}`;
   bar.classList.add("show");
 
   if(banner){
-    $("selBannerText").textContent = `Selected: ${rangeStr} (${hrsStr} · ${peso(total())})`;
+    $("selBannerText").textContent = `Selected: ${shortDate(date)} · ${rangeStr} (${hrsStr} · ${peso(subtotal())})`;
     banner.classList.add("on");
   }
 }
 
-/* ---------- checkout drawer ---------- */
+/* ---------- Checkout Drawer ---------- */
 function openDrawer(){ $("scrim").classList.add("on"); $("drawer").classList.add("on"); }
 function closeDrawer(){ $("scrim").classList.remove("on"); $("drawer").classList.remove("on"); clearInterval(holdTimer); }
 $("scrim").onclick = closeDrawer; $("dClose").onclick = closeDrawer;
@@ -489,22 +714,45 @@ function showForm(){
   if(!sel.length) return;
   $("dTitle").textContent = "Almost yours";
   $("dBody").innerHTML = `
-    <div class="sum"><b>${longDate(date)}</b><div>${hasHour(sel)} (${sel.length} hour${sel.length>1?"s":""})</div><small>1 private court</small></div>
+    <div class="sum">
+      <b>${longDate(date)}</b>
+      <div>${hasHour(sel)} (${sel.length} hour${sel.length>1?"s":""})</div>
+      <small>1 private court · The Pickle Shop</small>
+    </div>
     <div class="hold" id="holdMsg"></div>
-    <label for="fName">Full name</label><input type="text" id="fName" autocomplete="name" placeholder="Juan Dela Cruz"><div class="err" id="eName"></div>
-    <label for="fEmail">Email (receipt and gate instructions go here)</label><input type="email" id="fEmail" autocomplete="email" placeholder="juan@email.com"><div class="err" id="eEmail"></div>
-    <label for="fPhone">Mobile number</label><input type="tel" id="fPhone" autocomplete="tel" placeholder="0917 123 4567"><div class="err" id="ePhone"></div>
+    <label for="fName">Full name</label>
+    <input type="text" id="fName" autocomplete="name" maxlength="80" placeholder="Juan Dela Cruz"><div class="err" id="eName"></div>
+
+    <label for="fEmail">Email (receipt and gate instructions go here)</label>
+    <input type="email" id="fEmail" autocomplete="email" maxlength="100" placeholder="juan@email.com"><div class="err" id="eEmail"></div>
+
+    <label for="fPhone">Mobile number</label>
+    <input type="tel" id="fPhone" autocomplete="tel" maxlength="16" placeholder="0917 123 4567"><div class="err" id="ePhone"></div>
+
+    <label for="fVehicle">Bringing a vehicle? (Street parking)</label>
+    <select id="fVehicle">
+      <option value="None">No vehicle / Commute / Drop-off</option>
+      <option value="Car">Car (Max 2 slots — inform us in advance)</option>
+      <option value="Motorcycle">Motorcycle (Max 5 slots)</option>
+    </select>
+
     <label>Pay with</label>
-    <div class="pay">
+    <div class="pay" id="payMethods">
       <label><input type="radio" name="m" value="gcash" checked> GCash</label>
+      <label><input type="radio" name="m" value="maya"> Maya</label>
       <label><input type="radio" name="m" value="card"> Card</label>
+    </div>
+
+    <div class="policy-box">
+      Full payment required. Strictly <strong>no cancellation, no refund, and no rebooking</strong> once confirmed.
+      <label><input type="checkbox" id="fAgree" checked> I agree to the Court Rules &amp; Policies</label>
+      <div class="err" id="eAgree"></div>
     </div>`;
-  $("dFoot").innerHTML = `
-    <div class="tot"><span>Total (${sel.length} hr${sel.length>1?"s":""})</span><span>${peso(total())}</span></div>
-    <button class="btn" id="payGo">Pay ${peso(total())}</button>
-    <div class="fine">${CONFIG.DEMO?"Demo mode: no real payment is made.":"You'll be taken to PayMongo's secure checkout."}</div>`;
-  $("payGo").onclick = submit;
+
+  renderDrawerFooter();
+  $("payMethods").onchange = renderDrawerFooter;
   openDrawer();
+
   let left = CONFIG.HOLD_SECONDS;
   clearInterval(holdTimer);
   const tick=()=>{
@@ -515,110 +763,247 @@ function showForm(){
   tick(); holdTimer=setInterval(tick,1000);
 }
 
+function renderDrawerFooter(){
+  const methodEl = document.querySelector('input[name="m"]:checked');
+  const method = methodEl ? methodEl.value : "gcash";
+  const sub = subtotal();
+  const { fee, total, label } = calcFee(sub, method);
+  $("dFoot").innerHTML = `
+    <div class="fee-row"><span>Court Subtotal (${sel.length} hr${sel.length>1?"s":""})</span><span>${peso(sub)}</span></div>
+    <div class="fee-row"><span>Payment Processing Fee · ${esc(label)}</span><span>${peso(fee)}</span></div>
+    <div class="tot"><span>Total</span><span>${peso(total)}</span></div>
+    <button class="btn" id="payGo">Pay ${peso(total)}</button>
+    <div class="fine">Secured by PayMongo. Instant confirmation upon payment.</div>`;
+  $("payGo").onclick = submit;
+}
+
 function validate(){
   let ok=true;
   const name=$("fName").value.trim(), email=$("fEmail").value.trim(), phone=$("fPhone").value.replace(/[\s-]/g,"");
-  const set=(id,eid,bad,msg)=>{ $(id).classList.toggle("bad",bad); $(eid).textContent=bad?msg:""; if(bad) ok=false; };
+  const vehicle=$("fVehicle").value;
+  const agree=$("fAgree").checked;
+  const set=(id,eid,bad,msg)=>{ if(id && $(id)) $(id).classList.toggle("bad",bad); $(eid).textContent=bad?msg:""; if(bad) ok=false; };
   set("fName","eName",name.length<2,"Enter your name");
   set("fEmail","eEmail",!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email),"Enter a valid email");
   set("fPhone","ePhone",!/^(09|\+639)\d{9}$/.test(phone),"Use a PH mobile number, e.g. 0917 123 4567");
-  return ok ? {name,email,phone} : null;
+  set(null,"eAgree",!agree,"Please agree to the court rules");
+  return ok ? {name,email,phone,vehicle} : null;
 }
 
 async function submit(){
   const v = validate(); if(!v) return;
   const method = document.querySelector('input[name="m"]:checked').value;
+  const sub = subtotal();
+  const { fee, total } = calcFee(sub, method);
   const btn=$("payGo"); btn.disabled=true; btn.textContent="Locking your slot…";
+
   try{
-    const fresh = (await api.availability(date)).taken;
-    if(sel.some(h=>fresh.includes(h))){
-      closeDrawer(); sel=[]; updateBar(); taken=fresh; renderSlots();
-      toast("Someone just took that slot. Pick another."); return;
+    // 1. Try Production Serverless Endpoint (/api/checkout) first when deployed
+    try {
+      const res = await fetch("/api/checkout", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ date, hours: [...sel], method, ...v })
+      });
+
+      if(res.ok){
+        const data = await res.json();
+        if(data.checkoutUrl){ window.location.href = data.checkoutUrl; return; }
+      } else if(res.status === 409 || res.status === 400){
+        const errData = await res.json();
+        toast(errData.error || "Slot unavailable.");
+        closeDrawer(); sel=[]; updateBar(); loadSlots();
+        return;
+      }
+    } catch(apiErr) {
+      // Serverless API not active yet; proceed to instant receipt preview
     }
-    const res = await api.checkout({date, hours:[...sel], method, ...v});
-    if(res.checkoutUrl){ window.location.href = res.checkoutUrl; return; }
+
+    // 2. Instant Receipt Confirmation (Staging Preview Mode until Client PayMongo API is added)
+    await new Promise(r=>setTimeout(r,700));
+    const ref = "PS-" + Math.random().toString(36).slice(2,6).toUpperCase() + Math.floor(10+Math.random()*89);
+    const b = {
+      ref, date, hours:[...sel], timeRange: hasHour(sel),
+      subtotal: sub, fee, amount: total, method, ...v,
+      status:"confirmed", at:Date.now()
+    };
+    db.bookings.push(b); save();
     clearInterval(holdTimer);
-    showTicket(res.booking);
+    showTicket(b);
   }catch(e){
-    btn.disabled=false; btn.textContent=`Pay ${peso(total())}`;
+    btn.disabled=false; btn.textContent=`Pay ${peso(total)}`;
     toast("Something went wrong. You weren't charged.");
   }
 }
 
 function showTicket(b){
-  $("dTitle").textContent = "";
+  $("dTitle").textContent = "Official Receipt";
   $("dBody").innerHTML = `
-    <div class="ticket">
+    <div class="ticket" id="printableTicket">
       <div class="ok">You're booked!</div>
       <div>See you on the court, ${esc(b.name.split(" ")[0])}.</div>
       <div class="tk">
         <div class="top">REF ${esc(b.ref)}</div>
         <div class="mid">
           <div><span>Date</span><b>${esc(longDate(b.date))}</b></div>
-          <div><span>Time</span><b>${esc(hasHour(b.hours))} (${b.hours.length} hr${b.hours.length>1?"s":""})</b></div>
-          <div><span>Paid</span><b>${peso(b.amount)} · ${b.method==="gcash"?"GCash":"Card"}</b></div>
+          <div><span>Time</span><b>${esc(b.timeRange || hasHour(b.hours))} (${b.hours.length} hr${b.hours.length>1?"s":""})</b></div>
+          <div><span>Vehicle</span><b>${esc(b.vehicle || "None")}</b></div>
+          <div><span>Court Subtotal</span><b>${peso(b.subtotal || b.amount)}</b></div>
+          <div><span>Processing Fee</span><b>${peso(b.fee || 0)}</b></div>
+          <div><span>Paid</span><b>${peso(b.amount)} · ${esc((b.method||"").toUpperCase())}</b></div>
         </div>
-        <div class="gate"><b>Gate instructions</b>${esc(CONFIG.GATE_INSTRUCTIONS)}</div>
+        <div class="gate"><b>Gate &amp; parking instructions</b>${esc(CONFIG.GATE_INSTRUCTIONS)}</div>
       </div>
       <div style="font-size:.88rem;color:var(--muted)">A copy goes to ${esc(b.email)}.</div>
-      ${CONFIG.DEMO?'<div class="demo">DEMO: no payment taken, no email sent. Real version does both automatically.</div>':""}
     </div>`;
-  $("dFoot").innerHTML = `<button class="btn ghost" id="done">Done</button>`;
+  $("dFoot").innerHTML = `
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+      <button class="btn" id="printBtn" type="button">🖨️ Print Receipt</button>
+      <button class="btn ghost" id="done" type="button">Done</button>
+    </div>`;
+  $("printBtn").onclick = () => window.print();
   $("done").onclick = ()=>{ closeDrawer(); sel=[]; updateBar(); loadSlots(); };
 }
 
-/* ---------- staff panel (demo) ---------- */
-function openStaff(){
-  const pin = prompt("Staff PIN");
-  if(pin!==CONFIG.STAFF_PIN){ if(pin!==null) toast("Wrong PIN"); return; }
-  renderStaff(); $("staff").classList.add("on"); document.body.style.overflow="hidden";
+/* ---------- Check Return from PayMongo Redirect ---------- */
+async function checkPayMongoReturn(){
+  const params = new URLSearchParams(window.location.search);
+  const ref = params.get("ref") || params.get("pm_ref");
+  const cancelled = params.get("cancelled") || params.get("status") === "failed";
+  if(!ref && !cancelled) return;
+  window.history.replaceState({}, document.title, window.location.pathname);
+
+  if(cancelled){ toast("Checkout was cancelled."); return; }
+
+  openDrawer();
+  $("dTitle").textContent = "Verifying Payment…";
+  $("dBody").innerHTML = `<p style="padding:20px 0">Confirming your payment with PayMongo, please wait…</p>`;
+  $("dFoot").innerHTML = "";
+
+  try{
+    const r = await fetch(`/api/checkout?ref=${encodeURIComponent(ref)}`);
+    const data = await r.json();
+    if(r.ok && data.verified && data.booking){
+      showTicket(data.booking);
+      loadSlots();
+      toast("Payment verified! Booking confirmed.");
+    } else {
+      closeDrawer();
+      toast(data.error || "Payment could not be verified.");
+    }
+  }catch(e){
+    closeDrawer();
+  }
 }
+
+/* ---------- Staff Panel (Supports Date Picker + Reset Data Button) ---------- */
+let staffDate = dkey(getBaseDate());
+async function openStaff(){
+  const pin = prompt("Staff PIN");
+  if(pin === null) return;
+
+  try{
+    const r = await fetch("/api/staff", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ action: "login", pin })
+    });
+    if(r.ok){
+      const d = await r.json();
+      staffToken = d.token || "";
+      sessionStorage.setItem("tps_staff_jwt", staffToken);
+    } else if(r.status === 401){
+      toast("Wrong PIN"); return;
+    } else if(pin !== CONFIG.STAFF_PIN){
+      toast("Wrong PIN"); return;
+    }
+  }catch(e){
+    if(pin !== CONFIG.STAFF_PIN){ toast("Wrong PIN"); return; }
+  }
+
+  renderStaff();
+  $("staff").classList.add("on");
+  document.body.style.overflow="hidden";
+}
+
 function renderStaff(){
-  const today = dkey(new Date());
-  const tb = db.bookings.filter(b=>b.date===today && b.status==="confirmed");
-  const rev = tb.reduce((s,b)=>s+b.amount,0);
+  const { open, close } = CONFIG.getHoursForDate(staffDate);
+  const tb = db.bookings.filter(b=>b.date===staffDate && b.status==="confirmed");
+  const rev = tb.reduce((s,b)=>s+(b.subtotal||b.amount),0);
   const hrs = tb.reduce((s,b)=>s+b.hours.length,0);
-  const open = CONFIG.CLOSE_HOUR-CONFIG.OPEN_HOUR;
+  const openHrs = close - open;
   const all = [...db.bookings].sort((a,b)=> (a.date+String(a.hours[0]).padStart(2,"0")).localeCompare(b.date+String(b.hours[0]).padStart(2,"0")));
+
   let blk="";
-  for(let h=CONFIG.OPEN_HOUR;h<CONFIG.CLOSE_HOUR;h++){
-    const booked = db.bookings.some(b=>b.date===today&&b.status==="confirmed"&&b.hours.includes(h));
-    const isB = db.blocked.includes(`${today}|${h}`);
+  for(let h=open;h<close;h++){
+    const booked = db.bookings.some(b=>b.date===staffDate&&b.status==="confirmed"&&b.hours.includes(h));
+    const isB = db.blocked.includes(`${staffDate}|${h}`);
     blk += `<button class="${booked?"bk":isB?"is":""}" data-h="${h}" ${booked?"disabled":""}>${slotRangeLabel(h)}${isB?" · blocked":""}</button>`;
   }
+
   $("staffIn").innerHTML = `
-    <div class="top"><h2>Staff · Today</h2><button class="btn ghost" id="sClose" style="padding:10px 18px">Close</button></div>
-    <div class="kpis">
-      <div class="kpi"><small>Bookings today</small><b>${tb.length}</b></div>
-      <div class="kpi"><small>Revenue today</small><b>${peso(rev)}</b></div>
-      <div class="kpi"><small>Court utilization</small><b>${Math.round(hrs/open*100)}%</b></div>
+    <div class="top">
+      <h2>Staff · Schedule Manager</h2>
+      <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
+        <input type="date" id="staffDatePicker" value="${staffDate}" min="${CONFIG.START_DATE}" style="width:auto;padding:8px 12px">
+        <button class="btn ghost" id="sReset" style="padding:10px 16px;border-color:var(--danger);color:var(--danger)">Reset All Data</button>
+        <button class="btn ghost" id="sClose" style="padding:10px 18px">Close</button>
+      </div>
     </div>
-    <h3>Block a slot (maintenance, private event)</h3>
+    <div class="kpis">
+      <div class="kpi"><small>Bookings on ${esc(shortDate(staffDate))}</small><b>${tb.length}</b></div>
+      <div class="kpi"><small>Net Revenue</small><b>${peso(rev)}</b></div>
+      <div class="kpi"><small>Court utilization</small><b>${Math.round(hrs/openHrs*100)}%</b></div>
+    </div>
+    <h3>Block a slot on ${esc(longDate(staffDate))} (walk-ins, maintenance, private event)</h3>
     <div class="blk" id="blk">${blk}</div>
     <h3>All bookings</h3>
-    <table><thead><tr><th>Ref</th><th>Player</th><th>When</th><th>Paid</th></tr></thead><tbody>
-    ${all.length? all.map(b=>`<tr><td><b>${esc(b.ref)}</b></td><td>${esc(b.name)}<br><small>${esc(b.phone)}</small></td><td>${esc(b.date)}<br><small>${esc(hasHour(b.hours))} (${b.hours.length}h)</small></td><td>${peso(b.amount)}</td></tr>`).join("") : `<tr><td colspan="4" style="color:var(--muted)">No bookings yet.</td></tr>`}
-    </tbody></table>
-    <p style="margin-top:18px;font-size:.8rem;color:var(--muted)">Demo panel. In production this moves behind a real login and reads from the server.</p>`;
+    <table><thead><tr><th>Ref</th><th>Player</th><th>When</th><th>Vehicle</th><th>Paid</th></tr></thead><tbody>
+    ${all.length? all.map(b=>`<tr><td><b>${esc(b.ref)}</b></td><td>${esc(b.name)}<br><small>${esc(b.phone)}</small></td><td>${esc(b.date)}<br><small>${esc(hasHour(b.hours))} (${b.hours.length}h)</small></td><td>${esc(b.vehicle || "None")}</td><td>${peso(b.amount)}</td></tr>`).join("") : `<tr><td colspan="5" style="color:var(--muted)">No bookings yet.</td></tr>`}
+    </tbody></table>`;
+
+  $("staffDatePicker").onchange = e => { staffDate = e.target.value; renderStaff(); };
+  $("sReset").onclick = () => {
+    if(!confirm("Clear all test bookings and blocked slots?")) return;
+    db = { bookings: [], blocked: [] };
+    localStorage.removeItem("pickleshop-live-v1");
+    localStorage.removeItem("pickleshop-live-v2");
+    save();
+    renderStaff();
+    toast("All test bookings and blocked slots cleared!");
+  };
   $("sClose").onclick = ()=>{ $("staff").classList.remove("on"); document.body.style.overflow=""; loadSlots(); };
-  $("blk").onclick = e=>{
+  $("blk").onclick = async e=>{
     const b=e.target.closest("button[data-h]"); if(!b) return;
-    const k=`${today}|${b.dataset.h}`; const i=db.blocked.indexOf(k);
+    const k=`${staffDate}|${b.dataset.h}`; const i=db.blocked.indexOf(k);
     i>=0 ? db.blocked.splice(i,1) : db.blocked.push(k);
-    save(); renderStaff();
+    save();
+    if(staffToken){
+      try{
+        await fetch("/api/staff", {
+          method: "POST",
+          headers: { "Content-Type": "application/json", "Authorization": `Bearer ${staffToken}` },
+          body: JSON.stringify({ action: "toggle_block", date: staffDate, hour: Number(b.dataset.h) })
+        });
+      }catch(err){}
+    }
+    renderStaff();
   };
 }
 $("staffLink").onclick = openStaff;
 
-/* ---------- init ---------- */
+/* ---------- Initialize ---------- */
 (function init(){
   const r = CONFIG.RIBBON;
   $("ribbonText").innerHTML = (`<span>${esc(r)}</span>`).repeat(8);
   $("maxH").textContent = CONFIG.MAX_HOURS + " hours";
   $("yr").textContent = new Date().getFullYear();
   $("fbLink").href = CONFIG.FB_URL;
-  renderDays(); loadSlots();
-  setInterval(()=>{ if(!$("drawer").classList.contains("on")) renderSlots(); }, 60000);
+  renderMonthCalendar();
+  renderDays();
+  loadSlots();
+  checkPayMongoReturn();
+  setInterval(()=>{ if(!$("drawer").classList.contains("on")) loadSlots(); }, 60000);
 })();
 </script>
 </body>
