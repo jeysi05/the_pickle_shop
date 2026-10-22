@@ -174,7 +174,6 @@ nav a.cta:hover{background:var(--grape-dark)}
 .find .addr a{display:inline-block;margin-top:14px;font-weight:800;color:var(--grape-dark)}
 
 footer{padding:34px 5vw 120px;display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap;font-size:.88rem;color:var(--muted);max-width:1300px;margin:0 auto}
-footer button{text-decoration:underline;color:var(--muted)}
 
 /* drawer */
 .scrim{position:fixed;inset:0;background:rgba(11,61,30,.6);z-index:60;opacity:0;pointer-events:none;transition:.2s}
@@ -218,25 +217,6 @@ input.bad{border-color:var(--danger)}
 .tk .gate{border-top:2px dashed var(--deep);padding:14px 16px;text-align:left;background:var(--cream);font-size:.9rem}
 .tk .gate b{display:block;font-size:.72rem;letter-spacing:.14em;text-transform:uppercase;color:var(--grape-dark);margin-bottom:4px}
 
-/* staff */
-.staff{position:fixed;inset:0;background:var(--cream);z-index:80;overflow:auto;display:none}
-.staff.on{display:block}
-.staff-in{max-width:1000px;margin:0 auto;padding:30px 5vw 80px}
-.staff h2{font-family:'Shrikhand';font-weight:400;font-size:2.2rem;color:var(--deep)}
-.top{display:flex;justify-content:space-between;align-items:center;margin-bottom:24px;gap:12px;flex-wrap:wrap}
-.kpis{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:28px}
-.kpi{background:var(--paper);border:2px solid var(--deep);border-radius:14px;padding:16px}
-.kpi small{font-weight:700;text-transform:uppercase;letter-spacing:.1em;font-size:.7rem;color:var(--muted)}
-.kpi b{display:block;font-family:'Shrikhand';font-weight:400;font-size:2rem;color:var(--grape-dark)}
-.staff h3{margin:26px 0 10px}
-table{width:100%;border-collapse:collapse;background:var(--paper);border:2px solid var(--deep);border-radius:12px;overflow:hidden;font-size:.9rem}
-th,td{padding:11px 14px;text-align:left;border-bottom:1px solid var(--line)}
-th{background:var(--deep);color:var(--cream);font-size:.75rem;letter-spacing:.1em;text-transform:uppercase}
-.blk{display:grid;grid-template-columns:repeat(auto-fill,minmax(145px,1fr));gap:8px}
-.blk button{padding:10px;border-radius:10px;border:2px solid var(--deep);background:var(--paper);font-weight:700;font-size:.82rem}
-.blk button.is{background:var(--danger);color:#fff;border-color:var(--danger)}
-.blk button.bk{opacity:.4;cursor:not-allowed;background:#ddd}
-
 .toast{position:fixed;left:50%;bottom:100px;transform:translate(-50%,30px);background:var(--deep);color:var(--cream);padding:12px 20px;border-radius:12px;font-weight:700;z-index:100;opacity:0;pointer-events:none;transition:.25s;border:2px solid var(--ball)}
 .toast.on{opacity:1;transform:translate(-50%,0)}
 
@@ -249,7 +229,6 @@ th{background:var(--deep);color:var(--cream);font-size:.75rem;letter-spacing:.1e
   .step{grid-template-columns:44px 1fr;gap:12px}
   .step .n{font-size:2rem}
   nav a:not(.cta){display:none}
-  .kpis{grid-template-columns:1fr}
   .slots{grid-template-columns:repeat(2,1fr)}
   .slot{padding:11px 10px}
   .slot b{font-size:.84rem}
@@ -426,7 +405,7 @@ th{background:var(--deep);color:var(--cream);font-size:.75rem;letter-spacing:.1e
 
 <footer>
   <span>© <span id="yr"></span> The Pickle Shop. Your Space to Play &amp; Connect.</span>
-  <button id="staffLink">Staff</button>
+  <span>Taytay, Rizal</span>
 </footer>
 
 <!-- sticky summary bar -->
@@ -443,16 +422,11 @@ th{background:var(--deep);color:var(--cream);font-size:.75rem;letter-spacing:.1e
   <div class="df" id="dFoot"></div>
 </aside>
 
-<!-- staff -->
-<section class="staff" id="staff">
-  <div class="staff-in" id="staffIn"></div>
-</section>
-
 <div class="toast" id="toast"></div>
 
 <script>
 /* ==========================================================
-   THE PICKLE SHOP — CONFIGURATION
+   THE PICKLE SHOP — PUBLIC BOOKING CONFIGURATION
    ========================================================== */
 const CONFIG = {
   NAME: "The Pickle Shop",
@@ -475,11 +449,10 @@ const CONFIG = {
   },
   GATE_INSTRUCTIONS: "Tell the guard you're booked at The Pickle Shop (188 Buhangin, Taytay, Rizal) and show this reference code to our court helper. Street parking is limited to 2 cars and 5 motorcycles—please do not block neighboring driveways.",
   RIBBON: "Soft opening promo · Online calendar starts Oct 26 · Pickleball for everyone · Taytay, Rizal",
-  FB_URL: "https://www.facebook.com/profile.php?id=61595225496202",
-  STAFF_PIN: "2626"
+  FB_URL: "https://www.facebook.com/profile.php?id=61595225496202"
 };
 
-/* ---------- Clean Local Store (Auto-Wipes Old Test Data) ---------- */
+/* ---------- Shared Store (Synced with Private Staff Portal & API) ---------- */
 const KEY = "pickleshop-live-v3";
 try {
   localStorage.removeItem("pickleshop-live-v1");
@@ -490,6 +463,10 @@ let db = (()=>{ try{ return JSON.parse(localStorage.getItem(KEY)) }catch(e){retu
 function save(){ try{ localStorage.setItem(KEY, JSON.stringify(db)) }catch(e){} }
 
 function localTaken(dateKey){
+  try {
+    const fresh = JSON.parse(localStorage.getItem(KEY));
+    if (fresh) db = fresh;
+  } catch(e) {}
   const t = new Set();
   db.bookings.forEach(b=>{ if(b.date===dateKey && b.status==="confirmed") b.hours.forEach(h=>t.add(h)); });
   db.blocked.forEach(k=>{ const [d,h]=k.split("|"); if(d===dateKey) t.add(+h); });
@@ -513,13 +490,13 @@ const parseKey = k => { const [y,m,d]=k.split("-").map(Number); return new Date(
 const longDate = k => parseKey(k).toLocaleDateString("en-PH",{weekday:"long",month:"long",day:"numeric",year:"numeric"});
 const shortDate = k => parseKey(k).toLocaleDateString("en-PH",{weekday:"short",month:"short",day:"numeric"});
 const hasHour = hrs => `${hLabel(hrs[0])} – ${hLabel(hrs[hrs.length-1]+1)}`;
-function toast(m){ const t=$("toast"); t.textContent=m; t.classList.add("on"); clearTimeout(toast._t); toast._t=setTimeout(()=>t.classList.remove("on"),3000); }
+function toast(m){ const t=$("toast"); t.textContent=m; t.classList.add("on"); clearTimeout(toast._t); toast._t=setTimeout(()=>t.classList.remove("on"),3200); }
 
 /* ---------- Strictly Start on October 26, 2026 (or Today if after Oct 26) ---------- */
 function getBaseDate(){
   const now = new Date();
   const todayLocal = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-  const minDate = parseKey(CONFIG.START_DATE); // Oct 26, 2026
+  const minDate = parseKey(CONFIG.START_DATE);
   return todayLocal > minDate ? todayLocal : minDate;
 }
 
@@ -527,11 +504,10 @@ function getBaseDate(){
 const baseDateObj = getBaseDate();
 let date = dkey(baseDateObj);
 let calYear = baseDateObj.getFullYear();
-let calMonth = baseDateObj.getMonth(); // 9 = October
+let calMonth = baseDateObj.getMonth();
 let sel = [];
 let taken = [];
 let holdTimer = null;
-let staffToken = sessionStorage.getItem("tps_staff_jwt") || "";
 
 function subtotal(){ return sel.reduce((s,h)=>s+CONFIG.PRICE(h),0); }
 function calcFee(sub, methodKey){
@@ -550,7 +526,6 @@ function renderMonthCalendar(){
 
   $("calMonthTitle").textContent = firstDay.toLocaleDateString("en-PH", { month: "long", year: "numeric" });
 
-  // Prevent navigating earlier than October 2026
   const minMonthDate = getBaseDate();
   $("calPrev").disabled = (calYear === minMonthDate.getFullYear() && calMonth <= minMonthDate.getMonth());
 
@@ -607,7 +582,7 @@ function selectDate(newDateKey){
   updateBar();
 }
 
-/* ---------- Render: Horizontal Day Strip (Starts at Oct 26) ---------- */
+/* ---------- Render: Horizontal Day Strip ---------- */
 function renderDays(){
   const box = $("days"); box.innerHTML="";
   const base = getBaseDate();
@@ -790,49 +765,42 @@ function validate(){
   return ok ? {name,email,phone,vehicle} : null;
 }
 
+/* ---------- Live PayMongo Checkout Redirect ---------- */
 async function submit(){
   const v = validate(); if(!v) return;
   const method = document.querySelector('input[name="m"]:checked').value;
   const sub = subtotal();
   const { fee, total } = calcFee(sub, method);
-  const btn=$("payGo"); btn.disabled=true; btn.textContent="Locking your slot…";
+  const btn=$("payGo"); btn.disabled=true; btn.textContent="Redirecting to PayMongo…";
 
   try{
-    // 1. Try Production Serverless Endpoint (/api/checkout) first when deployed
-    try {
-      const res = await fetch("/api/checkout", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ date, hours: [...sel], method, ...v })
-      });
+    const res = await fetch("/api/checkout", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ date, hours: [...sel], method, ...v })
+    });
 
-      if(res.ok){
-        const data = await res.json();
-        if(data.checkoutUrl){ window.location.href = data.checkoutUrl; return; }
-      } else if(res.status === 409 || res.status === 400){
-        const errData = await res.json();
-        toast(errData.error || "Slot unavailable.");
-        closeDrawer(); sel=[]; updateBar(); loadSlots();
-        return;
-      }
-    } catch(apiErr) {
-      // Serverless API not active yet; proceed to instant receipt preview
+    const data = await res.json();
+
+    if(res.ok && data.checkoutUrl){
+      try {
+        localStorage.setItem("tps_cs_" + data.ref, data.sessionId);
+      } catch(e){}
+      window.location.href = data.checkoutUrl;
+      return;
     }
 
-    // 2. Instant Receipt Confirmation (Staging Preview Mode until Client PayMongo API is added)
-    await new Promise(r=>setTimeout(r,700));
-    const ref = "PS-" + Math.random().toString(36).slice(2,6).toUpperCase() + Math.floor(10+Math.random()*89);
-    const b = {
-      ref, date, hours:[...sel], timeRange: hasHour(sel),
-      subtotal: sub, fee, amount: total, method, ...v,
-      status:"confirmed", at:Date.now()
-    };
-    db.bookings.push(b); save();
-    clearInterval(holdTimer);
-    showTicket(b);
+    if(res.status === 409 || res.status === 400){
+      toast(data.error || "Slot unavailable.");
+      btn.disabled=false; btn.textContent=`Pay ${peso(total)}`;
+      return;
+    }
+
+    toast(data.error || "Unable to start PayMongo checkout.");
+    btn.disabled=false; btn.textContent=`Pay ${peso(total)}`;
   }catch(e){
     btn.disabled=false; btn.textContent=`Pay ${peso(total)}`;
-    toast("Something went wrong. You weren't charged.");
+    toast("Network error. Please try again.");
   }
 }
 
@@ -881,9 +849,14 @@ async function checkPayMongoReturn(){
   $("dFoot").innerHTML = "";
 
   try{
-    const r = await fetch(`/api/checkout?ref=${encodeURIComponent(ref)}`);
+    const csId = localStorage.getItem("tps_cs_" + ref) || "";
+    const r = await fetch(`/api/checkout?ref=${encodeURIComponent(ref)}&cs=${encodeURIComponent(csId)}`);
     const data = await r.json();
     if(r.ok && data.verified && data.booking){
+      if(!db.bookings.some(b => b.ref === data.booking.ref)){
+        db.bookings.push(data.booking);
+        save();
+      }
       showTicket(data.booking);
       loadSlots();
       toast("Payment verified! Booking confirmed.");
@@ -895,102 +868,6 @@ async function checkPayMongoReturn(){
     closeDrawer();
   }
 }
-
-/* ---------- Staff Panel (Supports Date Picker + Reset Data Button) ---------- */
-let staffDate = dkey(getBaseDate());
-async function openStaff(){
-  const pin = prompt("Staff PIN");
-  if(pin === null) return;
-
-  try{
-    const r = await fetch("/api/staff", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ action: "login", pin })
-    });
-    if(r.ok){
-      const d = await r.json();
-      staffToken = d.token || "";
-      sessionStorage.setItem("tps_staff_jwt", staffToken);
-    } else if(r.status === 401){
-      toast("Wrong PIN"); return;
-    } else if(pin !== CONFIG.STAFF_PIN){
-      toast("Wrong PIN"); return;
-    }
-  }catch(e){
-    if(pin !== CONFIG.STAFF_PIN){ toast("Wrong PIN"); return; }
-  }
-
-  renderStaff();
-  $("staff").classList.add("on");
-  document.body.style.overflow="hidden";
-}
-
-function renderStaff(){
-  const { open, close } = CONFIG.getHoursForDate(staffDate);
-  const tb = db.bookings.filter(b=>b.date===staffDate && b.status==="confirmed");
-  const rev = tb.reduce((s,b)=>s+(b.subtotal||b.amount),0);
-  const hrs = tb.reduce((s,b)=>s+b.hours.length,0);
-  const openHrs = close - open;
-  const all = [...db.bookings].sort((a,b)=> (a.date+String(a.hours[0]).padStart(2,"0")).localeCompare(b.date+String(b.hours[0]).padStart(2,"0")));
-
-  let blk="";
-  for(let h=open;h<close;h++){
-    const booked = db.bookings.some(b=>b.date===staffDate&&b.status==="confirmed"&&b.hours.includes(h));
-    const isB = db.blocked.includes(`${staffDate}|${h}`);
-    blk += `<button class="${booked?"bk":isB?"is":""}" data-h="${h}" ${booked?"disabled":""}>${slotRangeLabel(h)}${isB?" · blocked":""}</button>`;
-  }
-
-  $("staffIn").innerHTML = `
-    <div class="top">
-      <h2>Staff · Schedule Manager</h2>
-      <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
-        <input type="date" id="staffDatePicker" value="${staffDate}" min="${CONFIG.START_DATE}" style="width:auto;padding:8px 12px">
-        <button class="btn ghost" id="sReset" style="padding:10px 16px;border-color:var(--danger);color:var(--danger)">Reset All Data</button>
-        <button class="btn ghost" id="sClose" style="padding:10px 18px">Close</button>
-      </div>
-    </div>
-    <div class="kpis">
-      <div class="kpi"><small>Bookings on ${esc(shortDate(staffDate))}</small><b>${tb.length}</b></div>
-      <div class="kpi"><small>Net Revenue</small><b>${peso(rev)}</b></div>
-      <div class="kpi"><small>Court utilization</small><b>${Math.round(hrs/openHrs*100)}%</b></div>
-    </div>
-    <h3>Block a slot on ${esc(longDate(staffDate))} (walk-ins, maintenance, private event)</h3>
-    <div class="blk" id="blk">${blk}</div>
-    <h3>All bookings</h3>
-    <table><thead><tr><th>Ref</th><th>Player</th><th>When</th><th>Vehicle</th><th>Paid</th></tr></thead><tbody>
-    ${all.length? all.map(b=>`<tr><td><b>${esc(b.ref)}</b></td><td>${esc(b.name)}<br><small>${esc(b.phone)}</small></td><td>${esc(b.date)}<br><small>${esc(hasHour(b.hours))} (${b.hours.length}h)</small></td><td>${esc(b.vehicle || "None")}</td><td>${peso(b.amount)}</td></tr>`).join("") : `<tr><td colspan="5" style="color:var(--muted)">No bookings yet.</td></tr>`}
-    </tbody></table>`;
-
-  $("staffDatePicker").onchange = e => { staffDate = e.target.value; renderStaff(); };
-  $("sReset").onclick = () => {
-    if(!confirm("Clear all test bookings and blocked slots?")) return;
-    db = { bookings: [], blocked: [] };
-    localStorage.removeItem("pickleshop-live-v1");
-    localStorage.removeItem("pickleshop-live-v2");
-    save();
-    renderStaff();
-    toast("All test bookings and blocked slots cleared!");
-  };
-  $("sClose").onclick = ()=>{ $("staff").classList.remove("on"); document.body.style.overflow=""; loadSlots(); };
-  $("blk").onclick = async e=>{
-    const b=e.target.closest("button[data-h]"); if(!b) return;
-    const k=`${staffDate}|${b.dataset.h}`; const i=db.blocked.indexOf(k);
-    i>=0 ? db.blocked.splice(i,1) : db.blocked.push(k);
-    save();
-    if(staffToken){
-      try{
-        await fetch("/api/staff", {
-          method: "POST",
-          headers: { "Content-Type": "application/json", "Authorization": `Bearer ${staffToken}` },
-          body: JSON.stringify({ action: "toggle_block", date: staffDate, hour: Number(b.dataset.h) })
-        });
-      }catch(err){}
-    }
-    renderStaff();
-  };
-}
-$("staffLink").onclick = openStaff;
 
 /* ---------- Initialize ---------- */
 (function init(){

@@ -1,0 +1,455 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<meta name="theme-color" content="#0b3d1e">
+<title>The Pickle Shop — Owner &amp; Staff Portal</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Shrikhand&family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,500;12..96,700;12..96,800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --green:#1d9a2a;
+  --deep:#0b3d1e;
+  --ink:#10281a;
+  --grape:#b64fe0;
+  --grape-dark:#8a2fb3;
+  --ball:#e8f43c;
+  --cream:#f6f1e1;
+  --paper:#fffdf5;
+  --line:rgba(16,40,26,.14);
+  --muted:#5b6b60;
+  --danger:#c2410c;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Bricolage Grotesque',system-ui,sans-serif;background:var(--cream);color:var(--ink);line-height:1.45;-webkit-font-smoothing:antialiased;min-height:100vh}
+button{font:inherit;color:inherit;cursor:pointer;border:0;background:none}
+input,select{font:inherit}
+
+header{display:flex;align-items:center;justify-content:space-between;padding:14px 5vw;background:var(--deep);color:var(--cream);border-bottom:3px solid var(--ink)}
+.brand{display:flex;align-items:center;gap:12px;text-decoration:none;color:var(--cream)}
+.badge{width:42px;height:42px;border-radius:50%;background:var(--green);border:2px solid var(--cream);display:grid;place-items:center;color:var(--ball);font-family:'Shrikhand';font-size:.72rem;line-height:.85;text-align:center}
+.brand b{font-family:'Shrikhand';font-weight:400;font-size:1.25rem}
+.tag{background:var(--grape);color:#fff;font-size:.72rem;font-weight:800;padding:4px 10px;border-radius:99px;text-transform:uppercase;letter-spacing:.08em}
+
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;background:var(--grape);color:#fff;font-weight:800;padding:11px 18px;border-radius:12px;border:2px solid var(--deep);box-shadow:3px 3px 0 var(--deep);text-decoration:none;transition:transform .12s,box-shadow .12s;font-size:.9rem}
+.btn:hover{transform:translate(1px,1px);box-shadow:2px 2px 0 var(--deep)}
+.btn.ghost{background:var(--paper);color:var(--deep)}
+.btn.danger{background:var(--paper);color:var(--danger);border-color:var(--danger);box-shadow:3px 3px 0 var(--danger)}
+
+/* Login Card */
+.auth-wrap{max-width:420px;margin:8vh auto;padding:0 20px}
+.auth-card{background:var(--paper);border:3px solid var(--deep);border-radius:20px;padding:28px 26px;box-shadow:6px 6px 0 var(--deep)}
+.auth-card h1{font-family:'Shrikhand';font-weight:400;font-size:1.9rem;color:var(--deep);margin-bottom:6px}
+.auth-card p{color:var(--muted);font-size:.92rem;margin-bottom:18px}
+label{display:block;font-weight:700;font-size:.85rem;margin:12px 0 6px}
+input[type=password],input[type=text],input[type=date]{width:100%;padding:12px 14px;border:2px solid var(--line);border-radius:12px;background:#fff}
+input:focus{outline:none;border-color:var(--grape);box-shadow:0 0 0 4px rgba(182,79,224,.15)}
+.err{color:var(--danger);font-size:.82rem;margin-top:6px;min-height:1.1em;font-weight:700}
+
+/* Dashboard */
+.dash{display:none;max-width:1080px;margin:0 auto;padding:30px 5vw 90px}
+.dash.on{display:block}
+.top{display:flex;justify-content:space-between;align-items:center;margin-bottom:24px;gap:14px;flex-wrap:wrap}
+.top h2{font-family:'Shrikhand';font-weight:400;font-size:2.1rem;color:var(--deep)}
+.controls{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+
+.kpis{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:28px}
+.kpi{background:var(--paper);border:2px solid var(--deep);border-radius:16px;padding:18px;box-shadow:4px 4px 0 var(--deep)}
+.kpi small{font-weight:700;text-transform:uppercase;letter-spacing:.1em;font-size:.72rem;color:var(--muted)}
+.kpi b{display:block;font-family:'Shrikhand';font-weight:400;font-size:2.1rem;color:var(--grape-dark);margin-top:4px}
+
+.card-sec{background:var(--paper);border:2px solid var(--deep);border-radius:18px;padding:22px;margin-bottom:26px;box-shadow:4px 4px 0 var(--deep)}
+.card-sec h3{font-size:1.1rem;color:var(--deep);margin-bottom:6px}
+.card-sec p.sub{font-size:.86rem;color:var(--muted);margin-bottom:16px}
+
+.blk{display:grid;grid-template-columns:repeat(auto-fill,minmax(165px,1fr));gap:10px}
+.blk button{padding:12px 10px;border-radius:12px;border:2px solid var(--deep);background:var(--cream);font-weight:700;font-size:.84rem;text-align:left;transition:.12s}
+.blk button:hover:not(:disabled){border-color:var(--grape);transform:translateY(-1px)}
+.blk button span{display:block;font-size:.74rem;color:var(--muted);margin-top:2px;font-weight:600}
+.blk button.is{background:var(--danger);color:#fff;border-color:var(--deep)}
+.blk button.is span{color:#ffd7c9}
+.blk button.bk{opacity:.55;cursor:not-allowed;background:#e5e7eb}
+
+.table-wrap{overflow-x:auto}
+table{width:100%;border-collapse:collapse;background:var(--paper);border:2px solid var(--deep);border-radius:12px;overflow:hidden;font-size:.9rem}
+th,td{padding:12px 14px;text-align:left;border-bottom:1px solid var(--line)}
+th{background:var(--deep);color:var(--cream);font-size:.75rem;letter-spacing:.1em;text-transform:uppercase}
+
+/* Password Modal */
+.modal-scrim{position:fixed;inset:0;background:rgba(11,61,30,.65);z-index:90;display:none;place-items:center;padding:20px}
+.modal-scrim.on{display:grid}
+.modal{background:var(--paper);border:3px solid var(--deep);border-radius:20px;padding:26px;width:min(420px,100%);box-shadow:6px 6px 0 var(--deep)}
+.modal h3{font-family:'Shrikhand';font-weight:400;font-size:1.5rem;color:var(--deep);margin-bottom:6px}
+.modal p{font-size:.86rem;color:var(--muted);margin-bottom:14px}
+
+.toast{position:fixed;left:50%;bottom:30px;transform:translate(-50%,30px);background:var(--deep);color:var(--cream);padding:12px 20px;border-radius:12px;font-weight:700;z-index:100;opacity:0;pointer-events:none;transition:.25s;border:2px solid var(--ball)}
+.toast.on{opacity:1;transform:translate(-50%,0)}
+
+@media(max-width:760px){
+  .kpis{grid-template-columns:1fr}
+  .blk{grid-template-columns:repeat(2,1fr)}
+}
+</style>
+</head>
+<body>
+
+<header>
+  <a class="brand" href="/"><div class="badge">The<br>Pickle<br>Shop</div><b>The Pickle Shop</b></a>
+  <span class="tag">Owner Portal</span>
+</header>
+
+<!-- 1. Login Screen -->
+<main class="auth-wrap" id="authBox">
+  <form class="auth-card" id="loginForm">
+    <h1>Owner Login</h1>
+    <p>Enter your owner password to manage court slots, walk-ins, and bookings.</p>
+    <label for="pwInput">Password</label>
+    <input type="password" id="pwInput" placeholder="Enter password" autocomplete="current-password" required>
+    <div class="err" id="loginErr"></div>
+    <button type="submit" class="btn" style="width:100%;margin-top:8px">Unlock Dashboard →</button>
+    <div style="margin-top:16px;text-align:center;font-size:.82rem;color:var(--muted)">
+      <a href="/" style="text-decoration:underline">← Back to public booking page</a>
+    </div>
+  </form>
+</main>
+
+<!-- 2. Authenticated Owner Dashboard -->
+<section class="dash" id="dashBox">
+  <div class="top">
+    <div>
+      <h2>Schedule &amp; Booking Manager</h2>
+      <div style="font-size:.88rem;color:var(--muted)">Selected Date: <strong id="currentDateLabel" style="color:var(--deep)"></strong></div>
+    </div>
+    <div class="controls">
+      <input type="date" id="staffDatePicker" min="2026-10-26" style="width:auto;padding:9px 12px;font-weight:700">
+      <button type="button" class="btn ghost" id="changePwBtn">Change Password</button>
+      <button type="button" class="btn danger" id="resetDataBtn">Reset All Data</button>
+      <button type="button" class="btn ghost" id="logoutBtn">Log Out</button>
+    </div>
+  </div>
+
+  <div class="kpis" id="kpiGrid"></div>
+
+  <div class="card-sec">
+    <h3>Block / Unblock Hours on <span id="blkDateTitle"></span></h3>
+    <p class="sub">Tap any open hour below to block it for walk-ins, private events, or court maintenance. Tap a red blocked slot to re-open it.</p>
+    <div class="blk" id="blkGrid"></div>
+  </div>
+
+  <div class="card-sec">
+    <h3>Confirmed Bookings</h3>
+    <p class="sub">All online bookings and walk-in reservations recorded in the system.</p>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr><th>Ref</th><th>Player</th><th>Date &amp; Time</th><th>Vehicle</th><th>Paid</th></tr>
+        </thead>
+        <tbody id="bookingsBody"></tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<!-- 3. Self-Service Change Password Modal -->
+<div class="modal-scrim" id="pwModal">
+  <form class="modal" id="pwForm">
+    <h3>Change Owner Password</h3>
+    <p>Update your dashboard password anytime. You will use this new password the next time you log in.</p>
+
+    <label for="oldPw">Current Password</label>
+    <input type="password" id="oldPw" required placeholder="Enter current password">
+
+    <label for="newPw">New Password</label>
+    <input type="password" id="newPw" required minlength="4" placeholder="At least 4 characters">
+
+    <label for="confPw">Confirm New Password</label>
+    <input type="password" id="confPw" required minlength="4" placeholder="Re-enter new password">
+
+    <div class="err" id="pwErr"></div>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px">
+      <button type="button" class="btn ghost" id="cancelPwBtn">Cancel</button>
+      <button type="submit" class="btn">Save Password</button>
+    </div>
+  </form>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const CONFIG = {
+  START_DATE: "2026-10-26",
+  DEFAULT_PIN: "2626",
+  getHoursForDate(dateKey) {
+    const [y, m, d] = dateKey.split("-").map(Number);
+    const dow = new Date(y, m - 1, d).getDay();
+    const isWeekend = (dow === 0 || dow === 6);
+    return { open: 8, close: isWeekend ? 26 : 24, isWeekend };
+  }
+};
+
+const KEY = "pickleshop-live-v3";
+const TOKEN_KEY = "tps_owner_jwt";
+
+const $ = id => document.getElementById(id);
+const peso = n => "₱" + Number(n).toLocaleString("en-PH", { minimumFractionDigits: n % 1 === 0 ? 0 : 2, maximumFractionDigits: 2 });
+const pad = n => String(n).padStart(2,"0");
+const dkey = d => `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
+const parseKey = k => { const [y,m,d]=k.split("-").map(Number); return new Date(y,m-1,d); };
+const longDate = k => parseKey(k).toLocaleDateString("en-PH",{weekday:"long",month:"long",day:"numeric",year:"numeric"});
+const shortDate = k => parseKey(k).toLocaleDateString("en-PH",{weekday:"short",month:"short",day:"numeric"});
+const esc = s => String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const hLabel = h => {
+  const norm = ((h % 24) + 24) % 24;
+  const s = norm >= 12 ? "PM" : "AM";
+  const x = norm % 12 || 12;
+  return `${x}:00 ${s}`;
+};
+const slotRangeLabel = h => `${hLabel(h)} – ${hLabel(h+1)}`;
+const hasHour = hrs => `${hLabel(hrs[0])} – ${hLabel(hrs[hrs.length-1]+1)}`;
+function toast(m){ const t=$("toast"); t.textContent=m; t.classList.add("on"); clearTimeout(toast._t); toast._t=setTimeout(()=>t.classList.remove("on"),3000); }
+
+function getBaseDate(){
+  const now = new Date();
+  const todayLocal = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  const minDate = parseKey(CONFIG.START_DATE);
+  return todayLocal > minDate ? todayLocal : minDate;
+}
+
+let db = (()=>{ try{ return JSON.parse(localStorage.getItem(KEY)) }catch(e){return null} })() || {bookings:[], blocked:[]};
+function save(){ try{ localStorage.setItem(KEY, JSON.stringify(db)) }catch(e){} }
+
+let staffToken = sessionStorage.getItem(TOKEN_KEY) || "";
+let staffDate = dkey(getBaseDate());
+$("staffDatePicker").value = staffDate;
+
+/* ---------- Login & Session Flow ---------- */
+async function showDashboard(){
+  $("authBox").style.display = "none";
+  $("dashBox").classList.add("on");
+  await syncFromServer();
+}
+
+async function syncFromServer(){
+  try {
+    const r = await fetch("/api/staff", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${staffToken}`
+      },
+      body: JSON.stringify({ action: "dashboard", date: staffDate })
+    });
+    if (r.status === 401) {
+      sessionStorage.removeItem(TOKEN_KEY);
+      staffToken = "";
+      $("dashBox").classList.remove("on");
+      $("authBox").style.display = "block";
+      return;
+    }
+    if (r.ok) {
+      const data = await r.json();
+      db.bookings = Array.isArray(data.bookings) ? data.bookings : [];
+      db.blocked = Array.isArray(data.blocked) ? data.blocked : [];
+      save();
+    }
+  } catch (e) {}
+  renderDashboard();
+}
+
+$("loginForm").onsubmit = async (e) => {
+  e.preventDefault();
+  const entered = $("pwInput").value.trim();
+  $("loginErr").textContent = "";
+  const btn = $("loginForm").querySelector("button[type=submit]");
+  btn.disabled = true;
+  btn.textContent = "Checking…";
+
+  try {
+    const r = await fetch("/api/staff", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ action: "login", pin: entered })
+    });
+    const d = await r.json();
+    if (r.ok && d.token) {
+      staffToken = d.token;
+      sessionStorage.setItem(TOKEN_KEY, staffToken);
+      $("pwInput").value = "";
+      await showDashboard();
+      toast("Welcome back!");
+    } else {
+      $("loginErr").textContent = d.error || "Incorrect password. Please try again.";
+    }
+  } catch (err) {
+    $("loginErr").textContent = "Network error. Please try again.";
+  } finally {
+    btn.disabled = false;
+    btn.textContent = "Unlock Dashboard →";
+  }
+};
+
+$("logoutBtn").onclick = () => {
+  sessionStorage.removeItem(TOKEN_KEY);
+  staffToken = "";
+  $("dashBox").classList.remove("on");
+  $("authBox").style.display = "block";
+  toast("Logged out.");
+};
+
+/* ---------- Self-Service Change Password (Global) ---------- */
+$("changePwBtn").onclick = () => {
+  $("oldPw").value = "";
+  $("newPw").value = "";
+  $("confPw").value = "";
+  $("pwErr").textContent = "";
+  $("pwModal").classList.add("on");
+};
+
+$("cancelPwBtn").onclick = () => {
+  $("pwModal").classList.remove("on");
+};
+
+$("pwForm").onsubmit = async (e) => {
+  e.preventDefault();
+  const oldPin = $("oldPw").value.trim();
+  const newPin = $("newPw").value.trim();
+  const confPin = $("confPw").value.trim();
+
+  if (newPin.length < 4) {
+    $("pwErr").textContent = "New password must be at least 4 characters.";
+    return;
+  }
+  if (newPin !== confPin) {
+    $("pwErr").textContent = "New passwords do not match.";
+    return;
+  }
+
+  try {
+    const r = await fetch("/api/staff", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${staffToken}`
+      },
+      body: JSON.stringify({ action: "change_pin", oldPin, newPin })
+    });
+    const d = await r.json();
+    if (r.ok && d.ok) {
+      $("pwModal").classList.remove("on");
+      toast("Password updated across all devices!");
+    } else {
+      $("pwErr").textContent = d.error || "Current password is incorrect.";
+    }
+  } catch (err) {
+    $("pwErr").textContent = "Failed to update password. Try again.";
+  }
+};
+
+/* ---------- Render Schedule & Bookings ---------- */
+function renderDashboard(){
+  $("currentDateLabel").textContent = longDate(staffDate);
+  $("blkDateTitle").textContent = longDate(staffDate);
+
+  const { open, close } = CONFIG.getHoursForDate(staffDate);
+  const tb = db.bookings.filter(b => b.date === staffDate && b.status === "confirmed");
+  const rev = tb.reduce((s,b) => s + Number(b.subtotal || b.amount || 0), 0);
+  const hrs = tb.reduce((s,b) => s + (Array.isArray(b.hours) ? b.hours.length : 0), 0);
+  const openHrs = close - open;
+
+  $("kpiGrid").innerHTML = `
+    <div class="kpi"><small>Bookings on ${esc(shortDate(staffDate))}</small><b>${tb.length}</b></div>
+    <div class="kpi"><small>Net Court Revenue (${esc(shortDate(staffDate))})</small><b>${peso(rev)}</b></div>
+    <div class="kpi"><small>Court Utilization</small><b>${Math.round(hrs / openHrs * 100)}%</b></div>
+  `;
+
+  let blkHtml = "";
+  for(let h = open; h < close; h++){
+    const booked = db.bookings.some(b => b.date === staffDate && b.status === "confirmed" && Array.isArray(b.hours) && b.hours.includes(h));
+    const isBlocked = db.blocked.includes(`${staffDate}|${h}`);
+    const nextDay = h >= 24 ? " (Next Day)" : "";
+    blkHtml += `
+      <button type="button" class="${booked ? "bk" : isBlocked ? "is" : ""}" data-h="${h}" ${booked ? "disabled" : ""}>
+        ${slotRangeLabel(h)}${nextDay}
+        <span>${booked ? "Booked by player" : isBlocked ? "Blocked · Tap to open" : "Open · Tap to block"}</span>
+      </button>`;
+  }
+  $("blkGrid").innerHTML = blkHtml;
+
+  const all = [...db.bookings].sort((a,b) => (a.date + String((b.hours&&b.hours[0])||0).padStart(2,"0")).localeCompare(b.date + String((a.hours&&a.hours[0])||0).padStart(2,"0")));
+  $("bookingsBody").innerHTML = all.length
+    ? all.map(b => `
+        <tr>
+          <td><b>${esc(b.ref)}</b></td>
+          <td>${esc(b.name)}<br><small style="color:var(--muted)">${esc(b.phone)} · ${esc(b.email)}</small></td>
+          <td><b>${esc(shortDate(b.date))}</b><br><small>${esc(b.timeRange || hasHour(b.hours || [8]))} (${(b.hours||[]).length} hr${(b.hours||[]).length>1?"s":""})</small></td>
+          <td>${esc(b.vehicle || "None")}</td>
+          <td><b>${peso(b.amount)}</b><br><small style="color:var(--muted)">${esc((b.method || "").toUpperCase())}</small></td>
+        </tr>`).join("")
+    : `<tr><td colspan="5" style="color:var(--muted);text-align:center;padding:24px">No bookings recorded yet.</td></tr>`;
+}
+
+$("staffDatePicker").onchange = async (e) => {
+  if(e.target.value < CONFIG.START_DATE){
+    toast("Online schedule starts October 26, 2026.");
+    e.target.value = CONFIG.START_DATE;
+  }
+  staffDate = e.target.value;
+  await syncFromServer();
+};
+
+$("blkGrid").onclick = async (e) => {
+  const btn = e.target.closest("button[data-h]");
+  if(!btn) return;
+  const h = Number(btn.dataset.h);
+  const k = `${staffDate}|${h}`;
+  const idx = db.blocked.indexOf(k);
+  if(idx >= 0){
+    db.blocked.splice(idx, 1);
+    toast("Slot reopened!");
+  } else {
+    db.blocked.push(k);
+    toast("Slot blocked!");
+  }
+  save();
+  renderDashboard();
+
+  try {
+    await fetch("/api/staff", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${staffToken}`
+      },
+      body: JSON.stringify({ action: "toggle_block", date: staffDate, hour: h })
+    });
+  } catch (err) {}
+};
+
+$("resetDataBtn").onclick = async () => {
+  if(!confirm("Are you sure you want to clear all test bookings and blocked slots?")) return;
+  db = { bookings: [], blocked: [] };
+  save();
+  renderDashboard();
+  try {
+    await fetch("/api/staff", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${staffToken}`
+      },
+      body: JSON.stringify({ action: "reset_all" })
+    });
+    toast("All bookings and blocked slots cleared globally!");
+  } catch (err) {}
+};
+
+if(staffToken){
+  showDashboard();
+}
+</script>
+</body>
+</html>
