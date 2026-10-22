@@ -294,7 +294,7 @@ input.bad{border-color:var(--danger)}
       <div class="book-top">
         <div>
           <h2>Grab your hour.</h2>
-          <p class="sub">Online calendar booking starts <strong>Monday, October 26, 2026</strong>. Each box is <strong>1 full hour</strong> (e.g., <strong>8:00 AM – 9:00 AM</strong>). Tap consecutive boxes to play longer (up to <span id="maxH"></span>).</p>
+          <p class="sub">Online calendar booking starts <strong>Monday, October 26, 2026</strong>. Each box is <strong>1 full hour</strong> (e.g., <strong>8:00 AM – 9:00 AM</strong>). Tap consecutive available boxes to book a longer session, for as many hours as remain available before closing.</p>
         </div>
         <div class="hours-pill">
           <b>Operating Hours &amp; Rates</b>
@@ -432,7 +432,6 @@ const CONFIG = {
   NAME: "The Pickle Shop",
   START_DATE: "2026-10-26", // Strictly opens on Monday, Oct 26, 2026
   DAYS_AHEAD: 30,
-  MAX_HOURS: 4,
   HOLD_SECONDS: 300,
 
   getHoursForDate(dateKey) {
@@ -651,12 +650,22 @@ function renderSlots(){
 
 function pick(h){
   const lo=sel[0], hi=sel[sel.length-1];
+
   if(!sel.length) sel=[h];
-  else if(sel.includes(h)){ sel = (h===lo||h===hi) ? sel.filter(x=>x!==h) : [h]; }
-  else if(h===lo-1 && sel.length<CONFIG.MAX_HOURS) sel=[h,...sel];
-  else if(h===hi+1 && sel.length<CONFIG.MAX_HOURS) sel=[...sel,h];
-  else { if((h===lo-1||h===hi+1)) toast(`Max ${CONFIG.MAX_HOURS} hours per booking`); sel=[h]; }
-  renderSlots(); updateBar();
+  else if(sel.includes(h)){
+    // Keep the selected booking as one continuous range.
+    // Deselecting an endpoint shortens the range; tapping an interior hour
+    // starts a new selection from that hour.
+    sel = (h===lo||h===hi) ? sel.filter(x=>x!==h) : [h];
+  }
+  else if(h===lo-1) sel=[h,...sel];
+  else if(h===hi+1) sel=[...sel,h];
+  else sel=[h];
+
+  // No fixed four-hour cap: customers may select consecutive available
+  // hours until a taken slot or the court's closing time is reached.
+  renderSlots();
+  updateBar();
 }
 
 function updateBar(){
@@ -873,7 +882,6 @@ async function checkPayMongoReturn(){
 (function init(){
   const r = CONFIG.RIBBON;
   $("ribbonText").innerHTML = (`<span>${esc(r)}</span>`).repeat(8);
-  $("maxH").textContent = CONFIG.MAX_HOURS + " hours";
   $("yr").textContent = new Date().getFullYear();
   $("fbLink").href = CONFIG.FB_URL;
   renderMonthCalendar();
