@@ -1,9 +1,9 @@
 const FEE_RATES = {
   gcash: {
-    label: "GCash (2.23%)",
+    label: "GCash / QR Ph (2.23%)",
     pct: 0.0223,
     fixed: 0,
-    pmTypes: ["gcash"],
+    pmTypes: ["gcash", "qrph"],
   },
   maya: {
     label: "Maya / QR Ph (1.79%)",
@@ -15,7 +15,7 @@ const FEE_RATES = {
     label: "Card (3.125% + ₱13.39)",
     pct: 0.03125,
     fixed: 13.39,
-    pmTypes: ["card"],
+    pmTypes: ["card", "qrph"],
   },
 };
 
