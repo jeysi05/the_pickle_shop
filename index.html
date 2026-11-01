@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#0b3d1e">
 <title>The Pickle Shop — Book the Court</title>
-<meta name="description" content="Private pickleball court in Taytay, Rizal. Pick a slot starting October 26, pay with GCash or card, get your gate instructions.">
+<meta name="description" content="Private pickleball court in Taytay, Rizal. Pick a slot starting November 23, pay via Direct GCash QR, and get your gate instructions.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Shrikhand&family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,500;12..96,700;12..96,800&display=swap" rel="stylesheet">
@@ -22,6 +22,7 @@
   --line:rgba(16,40,26,.14);
   --muted:#5b6b60;
   --danger:#c2410c;
+  --gcash:#0057e7;
 }
 *{box-sizing:border-box;margin:0;padding:0}
 html{scroll-behavior:smooth;-webkit-text-size-adjust:100%}
@@ -178,43 +179,57 @@ footer{padding:34px 5vw 120px;display:flex;justify-content:space-between;gap:16p
 /* drawer */
 .scrim{position:fixed;inset:0;background:rgba(11,61,30,.6);z-index:60;opacity:0;pointer-events:none;transition:.2s}
 .scrim.on{opacity:1;pointer-events:auto}
-.drawer{position:fixed;top:0;right:0;bottom:0;width:min(460px,100%);background:var(--paper);z-index:70;transform:translateX(105%);transition:transform .28s cubic-bezier(.2,.8,.2,1);display:flex;flex-direction:column;border-left:3px solid var(--deep)}
+.drawer{position:fixed;top:0;right:0;bottom:0;width:min(480px,100%);background:var(--paper);z-index:70;transform:translateX(105%);transition:transform .28s cubic-bezier(.2,.8,.2,1);display:flex;flex-direction:column;border-left:3px solid var(--deep)}
 .drawer.on{transform:none}
-.dh{padding:22px 26px;border-bottom:2px dashed var(--line);display:flex;justify-content:space-between;align-items:flex-start}
-.dh h3{font-family:'Shrikhand';font-weight:400;font-size:1.7rem;color:var(--deep)}
+.dh{padding:18px 24px;border-bottom:2px dashed var(--line);display:flex;justify-content:space-between;align-items:flex-start}
+.dh h3{font-family:'Shrikhand';font-weight:400;font-size:1.65rem;color:var(--deep)}
 .x{font-size:1.6rem;line-height:1;padding:4px 8px;border-radius:8px}
 .x:hover{background:rgba(0,0,0,.07)}
-.db{padding:22px 26px;overflow-y:auto;flex:1}
-.sum{background:var(--cream);border:2px solid var(--deep);border-radius:14px;padding:14px 16px;margin-bottom:12px}
+.db{padding:18px 24px;overflow-y:auto;flex:1}
+.sum{background:var(--cream);border:2px solid var(--deep);border-radius:14px;padding:12px 15px;margin-bottom:10px}
 .sum b{display:block}
 .sum small{color:var(--muted)}
-.hold{font-size:.85rem;color:var(--danger);font-weight:700;margin-bottom:14px}
-label{display:block;font-weight:700;font-size:.85rem;margin:12px 0 5px}
-input[type=text],input[type=email],input[type=tel],input[type=password],select{width:100%;padding:12px 14px;border:2px solid var(--line);border-radius:12px;background:#fff;transition:.15s}
+.hold{font-size:.83rem;color:var(--danger);font-weight:700;margin-bottom:12px}
+label{display:block;font-weight:700;font-size:.84rem;margin:11px 0 4px}
+input[type=text],input[type=email],input[type=tel],input[type=password],select{width:100%;padding:11px 13px;border:2px solid var(--line);border-radius:12px;background:#fff;transition:.15s}
 input:focus,select:focus{outline:none;border-color:var(--grape);box-shadow:0 0 0 4px rgba(182,79,224,.15)}
 input.bad{border-color:var(--danger)}
-.err{color:var(--danger);font-size:.8rem;margin-top:4px;min-height:1em}
-.pay{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:6px}
-.pay label{margin:0;border:2px solid var(--line);border-radius:12px;padding:10px;display:flex;gap:6px;align-items:center;cursor:pointer;font-weight:700;font-size:.86rem}
-.pay input{accent-color:var(--grape)}
-.pay label:has(input:checked){border-color:var(--grape);background:#f8ebfd}
+.err{color:var(--danger);font-size:.78rem;margin-top:3px;min-height:1em}
+
+/* Direct GCash QR Box */
+.qr-card{background:var(--gcash);color:#fff;border:2.5px solid var(--deep);border-radius:16px;padding:16px;margin:14px 0 10px;text-align:center;box-shadow:4px 4px 0 var(--deep)}
+.qr-card .qr-hdr{font-weight:800;font-size:1rem;letter-spacing:.03em;margin-bottom:4px}
+.qr-card .qr-sub{font-size:.78rem;opacity:.9;margin-bottom:10px}
+.qr-img-wrap{background:#fff;padding:10px;border-radius:14px;display:inline-block;max-width:230px;width:100%;border:2px solid var(--deep)}
+.qr-img-wrap img{width:100%;height:auto;display:block;border-radius:8px}
+.qr-meta{margin-top:8px;font-size:.82rem;font-weight:700;background:rgba(0,0,0,.18);padding:6px 10px;border-radius:8px;display:inline-block}
+
+.upload-box{border:2px dashed var(--deep);background:var(--cream);border-radius:14px;padding:12px;text-align:center;cursor:pointer;transition:.15s;margin-top:4px}
+.upload-box:hover{border-color:var(--grape);background:#f8ebfd}
+.upload-box input{display:none}
+.upload-preview{max-height:130px;margin:8px auto 0;display:none;border-radius:8px;border:1.5px solid var(--deep)}
+.ai-status{font-size:.8rem;font-weight:700;margin-top:6px;padding:7px 10px;border-radius:8px;display:none}
+.ai-status.scanning{display:block;background:#fef3c7;color:#92400e;border:1px solid #f59e0b}
+.ai-status.ok{display:block;background:#dcfce7;color:#166534;border:1px solid #22c55e}
+.ai-status.warn{display:block;background:#ffedd5;color:#9a3412;border:1px solid #f97316}
+
 .policy-box{margin-top:12px;background:var(--cream);border:1.5px solid var(--deep);border-radius:12px;padding:10px 12px;font-size:.78rem}
 .policy-box label{margin:6px 0 0;display:flex;align-items:flex-start;gap:8px;font-weight:700;cursor:pointer;font-size:.8rem}
-.df{padding:16px 26px 22px;border-top:2px dashed var(--line)}
-.fee-row{display:flex;justify-content:space-between;font-size:.85rem;color:var(--muted);margin-bottom:4px}
-.tot{display:flex;justify-content:space-between;font-weight:800;font-size:1.15rem;margin:8px 0 12px;padding-top:8px;border-top:1px solid var(--line)}
+.df{padding:14px 24px 20px;border-top:2px dashed var(--line)}
+.tot{display:flex;justify-content:space-between;font-weight:800;font-size:1.15rem;margin:2px 0 10px}
 .df .btn{width:100%;justify-content:center}
-.fine{font-size:.76rem;color:var(--muted);margin-top:10px;text-align:center}
+.fine{font-size:.75rem;color:var(--muted);margin-top:8px;text-align:center}
 
 /* ticket */
 .ticket{text-align:center}
-.ticket .ok{font-family:'Shrikhand';font-size:2.2rem;color:var(--green);line-height:1.05;margin:6px 0 8px}
-.tk{margin:20px 0;border:3px solid var(--deep);border-radius:18px;background:#fff;position:relative;overflow:hidden}
+.ticket .ok{font-family:'Shrikhand';font-size:2rem;color:var(--green);line-height:1.05;margin:6px 0 8px}
+.status-pill{display:inline-block;padding:4px 12px;border-radius:99px;font-size:.76rem;font-weight:800;text-transform:uppercase;letter-spacing:.08em;background:#fef3c7;color:#92400e;border:1.5px solid #f59e0b;margin-bottom:8px}
+.tk{margin:16px 0;border:3px solid var(--deep);border-radius:18px;background:#fff;position:relative;overflow:hidden}
 .tk .top{background:var(--green);color:#fff;padding:14px;font-weight:800;letter-spacing:.06em}
-.tk .mid{padding:16px;text-align:left;display:grid;gap:8px;font-size:.95rem}
+.tk .mid{padding:16px;text-align:left;display:grid;gap:8px;font-size:.92rem}
 .tk .mid div{display:flex;justify-content:space-between;gap:10px}
 .tk .mid span{color:var(--muted)}
-.tk .gate{border-top:2px dashed var(--deep);padding:14px 16px;text-align:left;background:var(--cream);font-size:.9rem}
+.tk .gate{border-top:2px dashed var(--deep);padding:14px 16px;text-align:left;background:var(--cream);font-size:.88rem}
 .tk .gate b{display:block;font-size:.72rem;letter-spacing:.14em;text-transform:uppercase;color:var(--grape-dark);margin-bottom:4px}
 
 .toast{position:fixed;left:50%;bottom:100px;transform:translate(-50%,30px);background:var(--deep);color:var(--cream);padding:12px 20px;border-radius:12px;font-weight:700;z-index:100;opacity:0;pointer-events:none;transition:.25s;border:2px solid var(--ball)}
@@ -261,7 +276,7 @@ input.bad{border-color:var(--danger)}
     <div>
       <span class="kicker">Private court · Taytay, Rizal</span>
       <h1>Your court is <em>waiting.</em> Just pick a time.</h1>
-      <p>One private pickleball court, all yours for the hour. See what's open, pay with GCash or card, and your gate instructions land in your inbox. No group chat haggling.</p>
+      <p>One private pickleball court, all yours for the hour. See what's open starting November 23, scan our Direct GCash QR, upload your receipt, and lock your schedule.</p>
       <a class="btn" href="#book">See open slots →</a>
       <div class="facts">
         <span><i></i>Good sports</span>
@@ -294,7 +309,7 @@ input.bad{border-color:var(--danger)}
       <div class="book-top">
         <div>
           <h2>Grab your hour.</h2>
-          <p class="sub">Online calendar booking starts <strong>Monday, October 26, 2026</strong>. Each box is <strong>1 full hour</strong> (e.g., <strong>8:00 AM – 9:00 AM</strong>). Tap consecutive available boxes to book a longer session, for as many hours as remain available before closing.</p>
+          <p class="sub">Online calendar booking opens <strong>Monday, November 23, 2026</strong>. Each box is <strong>1 full hour</strong> (e.g., <strong>8:00 AM – 9:00 AM</strong>). Tap consecutive available boxes to book a longer session.</p>
         </div>
         <div class="hours-pill">
           <b>Operating Hours &amp; Rates</b>
@@ -303,11 +318,11 @@ input.bad{border-color:var(--danger)}
         </div>
       </div>
 
-      <!-- Visual Month Calendar + Day Strip starting Oct 26 -->
+      <!-- Visual Month Calendar + Day Strip starting Nov 23 -->
       <div class="cal-layout">
         <div class="cal-box">
           <div class="cal-head">
-            <strong id="calMonthTitle">October 2026</strong>
+            <strong id="calMonthTitle">November 2026</strong>
             <div class="cal-nav">
               <button type="button" id="calPrev" aria-label="Previous Month">‹</button>
               <button type="button" id="calNext" aria-label="Next Month">›</button>
@@ -317,12 +332,12 @@ input.bad{border-color:var(--danger)}
             <span>Sun</span><span>Mon</span><span>Tue</span><span>Wed</span><span>Thu</span><span>Fri</span><span>Sat</span>
           </div>
           <div class="cal-grid" id="calGrid"></div>
-          <div class="cal-note">Dates before Oct 26 are handled manually. Select <strong>Oct 26 onwards</strong>.</div>
+          <div class="cal-note">Nov 1–22 are already booked/handled manually. Select <strong>Nov 23 onwards</strong>.</div>
         </div>
 
         <div class="strip-wrap">
           <div class="strip-label">
-            <span>Available Dates (Starting Oct 26)</span>
+            <span>Available Dates (Starting Nov 23)</span>
             <span id="selectedDateLabel" style="color:var(--cream)"></span>
           </div>
           <div class="days" id="days"></div>
@@ -336,16 +351,16 @@ input.bad{border-color:var(--danger)}
         </div>
       </div>
 
-      <p class="hint">Times are Philippine time. Your slot is held for 5 minutes once you start checkout.</p>
+      <p class="hint">Times are Philippine time. Once you upload your GCash receipt, your slot is automatically held on the calendar.</p>
     </div>
   </section>
 
   <section class="how" id="how">
     <h2>Book in under a minute.</h2>
     <div class="steps">
-      <div class="step"><div class="n">1</div><div><h4>Pick a day (starting Oct 26) and time</h4><p>The schedule is live. Each slot box is 1 full hour—if a slot shows open, it's open.</p></div></div>
-      <div class="step"><div class="n">2</div><div><h4>Pay with GCash, Maya, or Card</h4><p>Checkout runs through PayMongo. The slot locks the moment you pay, so nobody else can take it.</p></div></div>
-      <div class="step"><div class="n">3</div><div><h4>Get your receipt and gate info</h4><p>Save your confirmation ticket and gate instructions right away. Show up and play.</p></div></div>
+      <div class="step"><div class="n">1</div><div><h4>Pick a day (starting Nov 23) and time</h4><p>The schedule is live. Each slot box is 1 full hour—if a slot shows open, it's open.</p></div></div>
+      <div class="step"><div class="n">2</div><div><h4>Scan our Direct GCash QR &amp; Upload Receipt</h4><p>Pay the exact court amount via InstaPay / GCash QR and upload your payment screenshot. Our automated reader checks the receipt details and holds your slot immediately.</p></div></div>
+      <div class="step"><div class="n">3</div><div><h4>Get notified &amp; receive your gate pass</h4><p>You'll get an instant confirmation alert once staff verifies your transfer. Save your pass and show up to play!</p></div></div>
     </div>
   </section>
 
@@ -355,7 +370,7 @@ input.bad{border-color:var(--danger)}
       <div class="rcard">
         <h4><span>1</span> Booking &amp; Payment</h4>
         <ul>
-          <li>Full payment is required to secure your booking.</li>
+          <li>Full payment via GCash QR is required to secure your booking.</li>
           <li><strong>No cancellation, no refund, and no rebooking</strong> once confirmed.</li>
           <li>Please arrive on time and respect your reserved schedule.</li>
         </ul>
@@ -430,9 +445,12 @@ input.bad{border-color:var(--danger)}
    ========================================================== */
 const CONFIG = {
   NAME: "The Pickle Shop",
-  START_DATE: "2026-10-26", // Strictly opens on Monday, Oct 26, 2026
-  DAYS_AHEAD: 30,
-  HOLD_SECONDS: 300,
+  START_DATE: "2026-11-23", // Strictly opens on Monday, Nov 23, 2026
+  DAYS_AHEAD: 35,
+  HOLD_SECONDS: 600,
+  QR_IMAGE_URL: "pickleshop-gcash-qr.jpg",
+  QR_IMAGE_FALLBACK: "public/pickleshop-gcash-qr.jpg",
+  GCASH_NAME: "PICKLESHOP (ER**A D.)",
 
   getHoursForDate(dateKey) {
     const [y, m, d] = dateKey.split("-").map(Number);
@@ -441,13 +459,8 @@ const CONFIG = {
     return { open: 8, close: isWeekend ? 26 : 24, isWeekend };
   },
   PRICE: h => (h >= 17 ? 500 : 450),
-  FEE_RATES: {
-    gcash: { label: "GCash (2.23%)", pct: 0.0223, fixed: 0 },
-    maya:  { label: "Maya / QR Ph (1.79%)", pct: 0.0179, fixed: 0 },
-    card:  { label: "Card (3.125% + ₱13.39)", pct: 0.03125, fixed: 13.39 }
-  },
-  GATE_INSTRUCTIONS: "Tell the guard you're booked at The Pickle Shop (188 Buhangin, Taytay, Rizal) and show this reference code to our court helper. Street parking is limited to 2 cars and 5 motorcycles—please do not block neighboring driveways.",
-  RIBBON: "Soft opening promo · Online calendar starts Oct 26 · Pickleball for everyone · Taytay, Rizal",
+  GATE_INSTRUCTIONS: "Tell the guard you're booked at The Pickle Shop (188 Buhangin, Taytay, Rizal) and show this reference pass to our court helper. Street parking is limited to 2 cars and 5 motorcycles—please do not block neighboring driveways.",
+  RIBBON: "Online calendar open for Nov 23 onwards · Direct GCash QR Checkout · Pickleball for everyone · Taytay, Rizal",
   FB_URL: "https://www.facebook.com/profile.php?id=61595225496202"
 };
 
@@ -467,7 +480,11 @@ function localTaken(dateKey){
     if (fresh) db = fresh;
   } catch(e) {}
   const t = new Set();
-  db.bookings.forEach(b=>{ if(b.date===dateKey && b.status==="confirmed") b.hours.forEach(h=>t.add(h)); });
+  db.bookings.forEach(b=>{
+    if(b.date===dateKey && (b.status==="confirmed" || b.status==="payment_review")){
+      (b.hours||[]).forEach(h=>t.add(h));
+    }
+  });
   db.blocked.forEach(k=>{ const [d,h]=k.split("|"); if(d===dateKey) t.add(+h); });
   return [...t];
 }
@@ -489,9 +506,9 @@ const parseKey = k => { const [y,m,d]=k.split("-").map(Number); return new Date(
 const longDate = k => parseKey(k).toLocaleDateString("en-PH",{weekday:"long",month:"long",day:"numeric",year:"numeric"});
 const shortDate = k => parseKey(k).toLocaleDateString("en-PH",{weekday:"short",month:"short",day:"numeric"});
 const hasHour = hrs => `${hLabel(hrs[0])} – ${hLabel(hrs[hrs.length-1]+1)}`;
-function toast(m){ const t=$("toast"); t.textContent=m; t.classList.add("on"); clearTimeout(toast._t); toast._t=setTimeout(()=>t.classList.remove("on"),3200); }
+function toast(m){ const t=$("toast"); t.textContent=m; t.classList.add("on"); clearTimeout(toast._t); toast._t=setTimeout(()=>t.classList.remove("on"),3800); }
 
-/* ---------- Strictly Start on October 26, 2026 (or Today if after Oct 26) ---------- */
+/* ---------- Strictly Start on November 23, 2026 (or Today if after Nov 23) ---------- */
 function getBaseDate(){
   const now = new Date();
   const todayLocal = new Date(now.getFullYear(), now.getMonth(), now.getDate());
@@ -507,14 +524,11 @@ let calMonth = baseDateObj.getMonth();
 let sel = [];
 let taken = [];
 let holdTimer = null;
+let uploadedReceiptDataUrl = "";
+let aiExtracted = null;
+let customerPollTimer = null;
 
 function subtotal(){ return sel.reduce((s,h)=>s+CONFIG.PRICE(h),0); }
-function calcFee(sub, methodKey){
-  const cfg = CONFIG.FEE_RATES[methodKey] || CONFIG.FEE_RATES.gcash;
-  const gross = (sub + cfg.fixed) / (1 - cfg.pct);
-  const fee = Math.ceil((gross - sub) * 100) / 100;
-  return { fee, total: +(sub + fee).toFixed(2), label: cfg.label };
-}
 
 /* ---------- Render: Interactive Month Calendar ---------- */
 function renderMonthCalendar(){
@@ -549,7 +563,7 @@ function renderMonthCalendar(){
     btn.className = "cal-cell " + (isLocked ? "locked" : "open") + (isSelected ? " on" : "") + (isLaunchDay ? " launch" : "");
     btn.disabled = isLocked;
     btn.textContent = d;
-    btn.title = isLocked ? "Manual bookings only before Oct 26" : `Book ${longDate(k)}`;
+    btn.title = isLocked ? "Nov 1–22 are handled manually" : `Book ${longDate(k)}`;
 
     if(!isLocked){
       btn.onclick = () => selectDate(k);
@@ -640,7 +654,7 @@ function renderSlots(){
       btn.className = "slot "+(off?"off":"open")+(sel.includes(h)?" sel":"");
       btn.disabled = off;
       const nextDayTag = h >= 24 ? " (Next Day)" : "";
-      btn.innerHTML = `<b>${slotRangeLabel(h)}${nextDayTag}</b><span>${taken.includes(h)?"Taken":isPast(h)?"Passed":"1 hr · " + peso(CONFIG.PRICE(h))}</span>`;
+      btn.innerHTML = `<b>${slotRangeLabel(h)}${nextDayTag}</b><span>${taken.includes(h)?"Reserved":isPast(h)?"Passed":"1 hr · " + peso(CONFIG.PRICE(h))}</span>`;
       if(!off) btn.onclick = ()=>pick(h);
       g.appendChild(btn);
     }
@@ -650,20 +664,14 @@ function renderSlots(){
 
 function pick(h){
   const lo=sel[0], hi=sel[sel.length-1];
-
   if(!sel.length) sel=[h];
   else if(sel.includes(h)){
-    // Keep the selected booking as one continuous range.
-    // Deselecting an endpoint shortens the range; tapping an interior hour
-    // starts a new selection from that hour.
     sel = (h===lo||h===hi) ? sel.filter(x=>x!==h) : [h];
   }
   else if(h===lo-1) sel=[h,...sel];
   else if(h===hi+1) sel=[...sel,h];
   else sel=[h];
 
-  // No fixed four-hour cap: customers may select consecutive available
-  // hours until a taken slot or the court's closing time is reached.
   renderSlots();
   updateBar();
 }
@@ -688,6 +696,34 @@ function updateBar(){
   }
 }
 
+/* ---------- Compress Uploaded Receipt Image ---------- */
+function compressReceiptImage(file){
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = e => {
+      const img = new Image();
+      img.onload = () => {
+        const canvas = document.createElement("canvas");
+        const maxDim = 900;
+        let w = img.width, h = img.height;
+        if(w > maxDim || h > maxDim){
+          if(w > h){ h = Math.round(h * maxDim / w); w = maxDim; }
+          else { w = Math.round(w * maxDim / h); h = maxDim; }
+        }
+        canvas.width = w;
+        canvas.height = h;
+        const ctx = canvas.getContext("2d");
+        ctx.drawImage(img, 0, 0, w, h);
+        resolve(canvas.toDataURL("image/jpeg", 0.78));
+      };
+      img.onerror = reject;
+      img.src = e.target.result;
+    };
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
+}
+
 /* ---------- Checkout Drawer ---------- */
 function openDrawer(){ $("scrim").classList.add("on"); $("drawer").classList.add("on"); }
 function closeDrawer(){ $("scrim").classList.remove("on"); $("drawer").classList.remove("on"); clearInterval(holdTimer); }
@@ -696,22 +732,49 @@ $("barGo").onclick = showForm;
 
 function showForm(){
   if(!sel.length) return;
-  $("dTitle").textContent = "Almost yours";
+  uploadedReceiptDataUrl = "";
+  aiExtracted = null;
+  const sub = subtotal();
+
+  $("dTitle").textContent = "Complete Booking";
   $("dBody").innerHTML = `
     <div class="sum">
       <b>${longDate(date)}</b>
-      <div>${hasHour(sel)} (${sel.length} hour${sel.length>1?"s":""})</div>
+      <div>${hasHour(sel)} (${sel.length} hour${sel.length>1?"s":""}) · <strong>${peso(sub)}</strong></div>
       <small>1 private court · The Pickle Shop</small>
     </div>
     <div class="hold" id="holdMsg"></div>
-    <label for="fName">Full name</label>
+
+    <div class="qr-card">
+      <div class="qr-hdr">Step 1: Scan to Pay ${peso(sub)} via GCash / InstaPay</div>
+      <div class="qr-sub">Scan using GCash or Maya app (InstaPay QR)</div>
+      <div class="qr-img-wrap">
+        <img src="${CONFIG.QR_IMAGE_URL}" alt="The Pickle Shop GCash QR Code" onerror="if(!this.dataset.tried){this.dataset.tried=1;this.src='${CONFIG.QR_IMAGE_FALLBACK}';}else{this.outerHTML='<div style=\\'padding:28px 12px;color:#0b3d1e;font-weight:800;font-size:.85rem\\'>QR image not found</div>'}">
+      </div>
+      <div><span class="qr-meta">Account: ${esc(CONFIG.GCASH_NAME)}</span></div>
+    </div>
+
+    <label for="fReceipt">Step 2: Upload GCash Payment Screenshot *</label>
+    <label class="upload-box" for="fReceipt">
+      <div id="uploadPrompt" style="font-weight:800;font-size:.88rem;color:var(--deep)">📸 Tap to upload GCash receipt screenshot</div>
+      <div style="font-size:.75rem;color:var(--muted);margin-top:2px">Our system automatically reads the amount &amp; reference number</div>
+      <input type="file" id="fReceipt" accept="image/*">
+      <img id="receiptPreview" class="upload-preview" alt="Receipt preview">
+    </label>
+    <div id="aiStatusBox" class="ai-status"></div>
+    <div class="err" id="eReceipt"></div>
+
+    <label for="fRefNum">GCash Reference Number (13 digits) *</label>
+    <input type="text" id="fRefNum" maxlength="20" placeholder="e.g. 1023456789012"><div class="err" id="eRefNum"></div>
+
+    <label for="fName">Full name *</label>
     <input type="text" id="fName" autocomplete="name" maxlength="80" placeholder="Juan Dela Cruz"><div class="err" id="eName"></div>
 
-    <label for="fEmail">Email (receipt and gate instructions go here)</label>
-    <input type="email" id="fEmail" autocomplete="email" maxlength="100" placeholder="juan@email.com"><div class="err" id="eEmail"></div>
-
-    <label for="fPhone">Mobile number</label>
+    <label for="fPhone">Mobile number *</label>
     <input type="tel" id="fPhone" autocomplete="tel" maxlength="16" placeholder="0917 123 4567"><div class="err" id="ePhone"></div>
+
+    <label for="fEmail">Email (for booking confirmation)</label>
+    <input type="email" id="fEmail" autocomplete="email" maxlength="100" placeholder="juan@email.com"><div class="err" id="eEmail"></div>
 
     <label for="fVehicle">Bringing a vehicle? (Street parking)</label>
     <select id="fVehicle">
@@ -720,162 +783,252 @@ function showForm(){
       <option value="Motorcycle">Motorcycle (Max 5 slots)</option>
     </select>
 
-    <label>Pay with</label>
-    <div class="pay" id="payMethods">
-      <label><input type="radio" name="m" value="gcash" checked> GCash</label>
-      <label><input type="radio" name="m" value="maya"> Maya</label>
-      <label><input type="radio" name="m" value="card"> Card</label>
-    </div>
-
     <div class="policy-box">
       Full payment required. Strictly <strong>no cancellation, no refund, and no rebooking</strong> once confirmed.
       <label><input type="checkbox" id="fAgree" checked> I agree to the Court Rules &amp; Policies</label>
       <div class="err" id="eAgree"></div>
     </div>`;
 
-  renderDrawerFooter();
-  $("payMethods").onchange = renderDrawerFooter;
+  $("dFoot").innerHTML = `
+    <div class="tot"><span>Total Amount Due</span><span>${peso(sub)}</span></div>
+    <button class="btn" id="payGo">Submit Payment &amp; Hold Slot →</button>
+    <div class="fine">Slot is held immediately upon submission while owner verifies GCash transfer.</div>`;
+
+  $("fReceipt").onchange = handleReceiptUpload;
+  $("payGo").onclick = submit;
   openDrawer();
 
   let left = CONFIG.HOLD_SECONDS;
   clearInterval(holdTimer);
   const tick=()=>{
     const el=$("holdMsg"); if(!el) return;
-    el.textContent = `Slot held for ${Math.floor(left/60)}:${pad(left%60)}`;
-    if(left--<=0){ clearInterval(holdTimer); closeDrawer(); sel=[]; updateBar(); loadSlots(); toast("Hold expired. Pick your slot again."); }
+    el.textContent = `Complete checkout within ${Math.floor(left/60)}:${pad(left%60)}`;
+    if(left--<=0){ clearInterval(holdTimer); closeDrawer(); sel=[]; updateBar(); loadSlots(); toast("Checkout timer expired. Please select your slot again."); }
   };
   tick(); holdTimer=setInterval(tick,1000);
 }
 
-function renderDrawerFooter(){
-  const methodEl = document.querySelector('input[name="m"]:checked');
-  const method = methodEl ? methodEl.value : "gcash";
-  const sub = subtotal();
-  const { fee, total, label } = calcFee(sub, method);
-  $("dFoot").innerHTML = `
-    <div class="fee-row"><span>Court Subtotal (${sel.length} hr${sel.length>1?"s":""})</span><span>${peso(sub)}</span></div>
-    <div class="fee-row"><span>Payment Processing Fee · ${esc(label)}</span><span>${peso(fee)}</span></div>
-    <div class="tot"><span>Total</span><span>${peso(total)}</span></div>
-    <button class="btn" id="payGo">Pay ${peso(total)}</button>
-    <div class="fine">Secured by PayMongo. Instant confirmation upon payment.</div>`;
-  $("payGo").onclick = submit;
+async function handleReceiptUpload(e){
+  const file = e.target.files && e.target.files[0];
+  if(!file) return;
+  $("eReceipt").textContent = "";
+  const aiBox = $("aiStatusBox");
+
+  try {
+    uploadedReceiptDataUrl = await compressReceiptImage(file);
+    const prev = $("receiptPreview");
+    prev.src = uploadedReceiptDataUrl;
+    prev.style.display = "block";
+    $("uploadPrompt").textContent = "✅ Receipt uploaded (Tap to change)";
+
+    aiBox.className = "ai-status scanning";
+    aiBox.textContent = "🔍 Scanning GCash receipt details…";
+
+    const r = await fetch("/api/checkout", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        action: "scan_receipt",
+        expectedAmount: subtotal(),
+        receiptImage: uploadedReceiptDataUrl
+      })
+    });
+    const d = await r.json();
+    if(r.ok && d.scan){
+      aiExtracted = d.scan;
+      if(d.scan.referenceNumber){
+        $("fRefNum").value = String(d.scan.referenceNumber).replace(/\D/g, "");
+      }
+      if(d.scan.amountMatches && d.scan.isValidReceipt){
+        aiBox.className = "ai-status ok";
+        aiBox.textContent = `✓ Receipt read: ${peso(d.scan.extractedAmount || subtotal())} · Ref #${d.scan.referenceNumber || "detected"}`;
+      } else if(d.scan.extractedAmount && !d.scan.amountMatches){
+        aiBox.className = "ai-status warn";
+        aiBox.textContent = `⚠️ Receipt shows ${peso(d.scan.extractedAmount)} (Expected ${peso(subtotal())}). Owner will review manually.`;
+      } else {
+        aiBox.className = "ai-status ok";
+        aiBox.textContent = "✓ Receipt attached. Please verify your GCash Reference Number below.";
+      }
+    } else {
+      aiBox.className = "ai-status ok";
+      aiBox.textContent = "✓ Receipt attached. Please enter the 13-digit Reference Number below.";
+    }
+  } catch (err) {
+    aiBox.className = "ai-status ok";
+    aiBox.textContent = "✓ Receipt attached. Please enter the Reference Number below.";
+  }
 }
 
 function validate(){
   let ok=true;
-  const name=$("fName").value.trim(), email=$("fEmail").value.trim(), phone=$("fPhone").value.replace(/[\s-]/g,"");
+  const name=$("fName").value.trim();
+  const email=$("fEmail").value.trim();
+  const phone=$("fPhone").value.replace(/[\s-]/g,"");
+  const refNum=$("fRefNum").value.replace(/[\s-]/g,"");
   const vehicle=$("fVehicle").value;
   const agree=$("fAgree").checked;
+
   const set=(id,eid,bad,msg)=>{ if(id && $(id)) $(id).classList.toggle("bad",bad); $(eid).textContent=bad?msg:""; if(bad) ok=false; };
-  set("fName","eName",name.length<2,"Enter your name");
-  set("fEmail","eEmail",!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email),"Enter a valid email");
+  set(null,"eReceipt",!uploadedReceiptDataUrl,"Please upload your GCash payment screenshot");
+  set("fRefNum","eRefNum",!/^\d{8,16}$/.test(refNum),"Enter a valid GCash Reference Number (8–13 digits)");
+  set("fName","eName",name.length<2,"Enter your full name");
   set("fPhone","ePhone",!/^(09|\+639)\d{9}$/.test(phone),"Use a PH mobile number, e.g. 0917 123 4567");
+  set("fEmail","eEmail",email.length > 0 && !/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email),"Enter a valid email");
   set(null,"eAgree",!agree,"Please agree to the court rules");
-  return ok ? {name,email,phone,vehicle} : null;
+  return ok ? {name,email,phone,vehicle,gcashRefNumber:refNum,receiptImage:uploadedReceiptDataUrl} : null;
 }
 
-/* ---------- Live PayMongo Checkout Redirect ---------- */
+/* ---------- Submit Direct GCash Booking ---------- */
 async function submit(){
   const v = validate(); if(!v) return;
-  const method = document.querySelector('input[name="m"]:checked').value;
-  const sub = subtotal();
-  const { fee, total } = calcFee(sub, method);
-  const btn=$("payGo"); btn.disabled=true; btn.textContent="Redirecting to PayMongo…";
+  const btn=$("payGo"); btn.disabled=true; btn.textContent="Verifying & Locking Slot…";
+
+  if("Notification" in window && Notification.permission === "default"){
+    Notification.requestPermission().catch(()=>{});
+  }
 
   try{
     const res = await fetch("/api/checkout", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ date, hours: [...sel], method, ...v })
+      body: JSON.stringify({
+        date,
+        hours: [...sel],
+        method: "gcash_qr",
+        ...v
+      })
     });
 
     const data = await res.json();
 
-    if(res.ok && data.checkoutUrl){
-      try {
-        localStorage.setItem("tps_cs_" + data.ref, data.sessionId);
-      } catch(e){}
-      window.location.href = data.checkoutUrl;
-      return;
-    }
-
-    if(res.status === 409 || res.status === 400){
-      toast(data.error || "Slot unavailable.");
-      btn.disabled=false; btn.textContent=`Pay ${peso(total)}`;
-      return;
-    }
-
-    toast(data.error || "Unable to start PayMongo checkout.");
-    btn.disabled=false; btn.textContent=`Pay ${peso(total)}`;
-  }catch(e){
-    btn.disabled=false; btn.textContent=`Pay ${peso(total)}`;
-    toast("Network error. Please try again.");
-  }
-}
-
-function showTicket(b){
-  $("dTitle").textContent = "Official Receipt";
-  $("dBody").innerHTML = `
-    <div class="ticket" id="printableTicket">
-      <div class="ok">You're booked!</div>
-      <div>See you on the court, ${esc(b.name.split(" ")[0])}.</div>
-      <div class="tk">
-        <div class="top">REF ${esc(b.ref)}</div>
-        <div class="mid">
-          <div><span>Date</span><b>${esc(longDate(b.date))}</b></div>
-          <div><span>Time</span><b>${esc(b.timeRange || hasHour(b.hours))} (${b.hours.length} hr${b.hours.length>1?"s":""})</b></div>
-          <div><span>Vehicle</span><b>${esc(b.vehicle || "None")}</b></div>
-          <div><span>Court Subtotal</span><b>${peso(b.subtotal || b.amount)}</b></div>
-          <div><span>Processing Fee</span><b>${peso(b.fee || 0)}</b></div>
-          <div><span>Paid</span><b>${peso(b.amount)} · ${esc((b.method||"").toUpperCase())}</b></div>
-        </div>
-        <div class="gate"><b>Gate &amp; parking instructions</b>${esc(CONFIG.GATE_INSTRUCTIONS)}</div>
-      </div>
-      <div style="font-size:.88rem;color:var(--muted)">A copy goes to ${esc(b.email)}.</div>
-    </div>`;
-  $("dFoot").innerHTML = `
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
-      <button class="btn" id="printBtn" type="button">🖨️ Print Receipt</button>
-      <button class="btn ghost" id="done" type="button">Done</button>
-    </div>`;
-  $("printBtn").onclick = () => window.print();
-  $("done").onclick = ()=>{ closeDrawer(); sel=[]; updateBar(); loadSlots(); };
-}
-
-/* ---------- Check Return from PayMongo Redirect ---------- */
-async function checkPayMongoReturn(){
-  const params = new URLSearchParams(window.location.search);
-  const ref = params.get("ref") || params.get("pm_ref");
-  const cancelled = params.get("cancelled") || params.get("status") === "failed";
-  if(!ref && !cancelled) return;
-  window.history.replaceState({}, document.title, window.location.pathname);
-
-  if(cancelled){ toast("Checkout was cancelled."); return; }
-
-  openDrawer();
-  $("dTitle").textContent = "Verifying Payment…";
-  $("dBody").innerHTML = `<p style="padding:20px 0">Confirming your payment with PayMongo, please wait…</p>`;
-  $("dFoot").innerHTML = "";
-
-  try{
-    const csId = localStorage.getItem("tps_cs_" + ref) || "";
-    const r = await fetch(`/api/checkout?ref=${encodeURIComponent(ref)}&cs=${encodeURIComponent(csId)}`);
-    const data = await r.json();
-    if(r.ok && data.verified && data.booking){
+    if(res.ok && data.booking){
+      clearInterval(holdTimer);
       if(!db.bookings.some(b => b.ref === data.booking.ref)){
         db.bookings.push(data.booking);
         save();
       }
       showTicket(data.booking);
       loadSlots();
-      toast("Payment verified! Booking confirmed.");
-    } else {
-      closeDrawer();
-      toast(data.error || "Payment could not be verified.");
+      toast("Slot held! Staff has been notified to verify your GCash receipt.");
+      return;
     }
+
+    toast(data.error || "Unable to submit booking.");
+    btn.disabled=false; btn.textContent="Submit Payment & Hold Slot →";
   }catch(e){
-    closeDrawer();
+    btn.disabled=false; btn.textContent="Submit Payment & Hold Slot →";
+    toast("Network error. Please try again.");
   }
+}
+
+/* ---------- Audio Chime & Browser Notification Helper (Customer Side) ---------- */
+function playCustomerChime(){
+  try {
+    const ctx = new (window.AudioContext || window.webkitAudioContext)();
+    [523.25, 659.25, 783.99, 1046.5].forEach((freq, idx) => {
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.type = "triangle";
+      osc.frequency.value = freq;
+      gain.gain.setValueAtTime(0.18, ctx.currentTime + idx * 0.11);
+      gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + idx * 0.11 + 0.35);
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      osc.start(ctx.currentTime + idx * 0.11);
+      osc.stop(ctx.currentTime + idx * 0.11 + 0.35);
+    });
+  } catch(e){}
+}
+
+function notifyCustomerConfirmed(b){
+  playCustomerChime();
+  toast("🎉 Your booking has been CONFIRMED by The Pickle Shop!");
+  if("Notification" in window && Notification.permission === "granted"){
+    try {
+      new Notification("Booking Confirmed! — The Pickle Shop", {
+        body: `Ref ${b.ref} (${shortDate(b.date)} · ${b.timeRange || hasHour(b.hours)}) is now officially confirmed!`,
+      });
+    } catch(e){}
+  }
+}
+
+function startCustomerStatusPolling(bookingRef){
+  clearInterval(customerPollTimer);
+  try { localStorage.setItem("tps_active_ref", bookingRef); } catch(e){}
+
+  customerPollTimer = setInterval(async () => {
+    try {
+      // 1. Check shared localStorage first (instant if tested on same browser)
+      const localFresh = JSON.parse(localStorage.getItem(KEY) || "{}");
+      const localMatch = (localFresh.bookings || []).find(x => x.ref === bookingRef);
+      if(localMatch && localMatch.status === "confirmed"){
+        clearInterval(customerPollTimer);
+        localStorage.removeItem("tps_active_ref");
+        notifyCustomerConfirmed(localMatch);
+        openDrawer();
+        showTicket(localMatch);
+        loadSlots();
+        return;
+      }
+
+      // 2. Check server API status across devices
+      const r = await fetch(`/api/checkout?ref=${encodeURIComponent(bookingRef)}`);
+      if(!r.ok) return;
+      const d = await r.json();
+      if(d.status === "confirmed" && d.booking){
+        clearInterval(customerPollTimer);
+        localStorage.removeItem("tps_active_ref");
+        const idx = db.bookings.findIndex(x => x.ref === bookingRef);
+        if(idx >= 0) db.bookings[idx].status = "confirmed";
+        else db.bookings.push(d.booking);
+        save();
+        notifyCustomerConfirmed(d.booking);
+        openDrawer();
+        showTicket(d.booking);
+        loadSlots();
+      }
+    } catch(e){}
+  }, 7000);
+}
+
+function showTicket(b){
+  $("dTitle").textContent = "Booking Pass";
+  const isConfirmed = b.status === "confirmed";
+  if(!isConfirmed){
+    startCustomerStatusPolling(b.ref);
+  }
+  $("dBody").innerHTML = `
+    <div class="ticket" id="printableTicket">
+      <span class="status-pill" style="${isConfirmed ? "background:#dcfce7;color:#166534;border-color:#22c55e" : ""}">
+        ${isConfirmed ? "✓ Payment Verified & Confirmed" : "⏳ Payment Under Review · Slot Held"}
+      </span>
+      <div class="ok">${isConfirmed ? "You're Confirmed!" : "Slot Reserved!"}</div>
+      <div>${isConfirmed
+        ? `See you on the court, <strong>${esc(b.name.split(" ")[0])}</strong>! Your payment has been verified by staff.`
+        : `Thanks, <strong>${esc(b.name.split(" ")[0])}</strong>! Your slot is locked on our calendar. Keep this tab open—we'll notify you right here the moment staff confirms GCash Ref <strong>#${esc(b.gcashRefNumber || "N/A")}</strong>.`
+      }</div>
+      <div class="tk">
+        <div class="top" style="${isConfirmed ? "background:var(--green)" : "background:#d97706"}">BOOKING REF ${esc(b.ref)}</div>
+        <div class="mid">
+          <div><span>Status</span><b>${isConfirmed ? "CONFIRMED ✓" : "AWAITING STAFF APPROVAL"}</b></div>
+          <div><span>Date</span><b>${esc(longDate(b.date))}</b></div>
+          <div><span>Time</span><b>${esc(b.timeRange || hasHour(b.hours))} (${b.hours.length} hr${b.hours.length>1?"s":""})</b></div>
+          <div><span>Player</span><b>${esc(b.name)} (${esc(b.phone)})</b></div>
+          <div><span>Vehicle</span><b>${esc(b.vehicle || "None")}</b></div>
+          <div><span>GCash Ref #</span><b>${esc(b.gcashRefNumber || "—")}</b></div>
+          <div><span>Amount Paid</span><b>${peso(b.amount)} · Direct GCash QR</b></div>
+        </div>
+        <div class="gate"><b>Gate &amp; parking instructions</b>${esc(CONFIG.GATE_INSTRUCTIONS)}</div>
+      </div>
+      <div style="font-size:.84rem;color:var(--muted)">Save or screenshot this pass for entry at the court.</div>
+    </div>`;
+  $("dFoot").innerHTML = `
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+      <button class="btn" id="printBtn" type="button">🖨️ Save / Print</button>
+      <button class="btn ghost" id="done" type="button">Done</button>
+    </div>`;
+  $("printBtn").onclick = () => window.print();
+  $("done").onclick = ()=>{ closeDrawer(); sel=[]; updateBar(); loadSlots(); };
 }
 
 /* ---------- Initialize ---------- */
@@ -887,8 +1040,12 @@ async function checkPayMongoReturn(){
   renderMonthCalendar();
   renderDays();
   loadSlots();
-  checkPayMongoReturn();
-  setInterval(()=>{ if(!$("drawer").classList.contains("on")) loadSlots(); }, 60000);
+  // Resume status polling if player had a pending booking
+  try {
+    const activeRef = localStorage.getItem("tps_active_ref");
+    if(activeRef) startCustomerStatusPolling(activeRef);
+  } catch(e){}
+  setInterval(()=>{ if(!$("drawer").classList.contains("on")) loadSlots(); }, 30000);
 })();
 </script>
 </body>

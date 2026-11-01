@@ -1,6 +1,13 @@
 // api/staff.js
 import crypto from "crypto";
 
+const memoryStore =
+  globalThis.__tpsDirectStore ||
+  (globalThis.__tpsDirectStore = {
+    bookings: [],
+    usedRefs: new Set(),
+  });
+
 function signToken(payload, secret) {
   const data = Buffer.from(JSON.stringify(payload)).toString("base64url");
   const sig = crypto.createHmac("sha256", secret).update(data).digest("base64url");
@@ -32,9 +39,9 @@ export default async function handler(req, res) {
     return res.status(405).json({ error: "Method not allowed" });
   }
 
-  const { action, pin, oldPin, newPin, date, hour } = req.body || {};
+  const { action, pin, oldPin, newPin, date, hour, ref, decision, bookingData } = req.body || {};
 
-  // 1. Staff Login (Verifies against Google Sheet 'Settings' tab so owner password changes work everywhere)
+  // 1. Staff Login
   if (action === "login") {
     let isValid = false;
     if (scriptUrl) {
@@ -67,24 +74,70 @@ export default async function handler(req, res) {
     return res.status(401).json({ error: "Unauthorized or expired session. Please log in again." });
   }
 
-  // 2. Load Staff Dashboard Data from Google Sheet
+  // 2. Load Staff Dashboard Data
   if (action === "dashboard") {
-    if (!scriptUrl) return res.status(200).json({ bookings: [], blocked: [] });
-    try {
-      const r = await fetch(
-        `${scriptUrl}?action=staff_dashboard&date=${encodeURIComponent(date || "")}&secret=${encodeURIComponent(scriptSecret)}`
-      );
-      const data = await r.json();
-      return res.status(200).json({
-        bookings: Array.isArray(data.bookings) ? data.bookings : [],
-        blocked: Array.isArray(data.blocked) ? data.blocked : []
-      });
-    } catch (err) {
-      return res.status(500).json({ error: "Failed to load dashboard from Google Sheet." });
+    let sheetBookings = [];
+    let sheetBlocked = [];
+    if (scriptUrl) {
+      try {
+        const r = await fetch(
+          `${scriptUrl}?action=staff_dashboard&date=${encodeURIComponent(date || "")}&secret=${encodeURIComponent(scriptSecret)}`
+        );
+        const data = await r.json();
+        sheetBookings = Array.isArray(data.bookings) ? data.bookings : [];
+        sheetBlocked = Array.isArray(data.blocked) ? data.blocked : [];
+      } catch (err) {}
     }
+
+    const mergedMap = new Map();
+    sheetBookings.forEach((b) => { if (b && b.ref) mergedMap.set(b.ref, b); });
+    memoryStore.bookings.forEach((b) => { if (b && b.ref) mergedMap.set(b.ref, b); });
+
+    return res.status(200).json({
+      bookings: [...mergedMap.values()],
+      blocked: sheetBlocked
+    });
   }
 
-  // 3. Toggle Block/Unblock Slot Globally in Google Sheet
+  // 3. Approve or Reject Pending GCash Booking & Notify Customer
+  if (action === "review_booking") {
+    let targetBooking = bookingData || null;
+    const idx = memoryStore.bookings.findIndex((b) => b.ref === ref);
+    if (idx >= 0) {
+      if (decision === "confirm") {
+        memoryStore.bookings[idx].status = "confirmed";
+        memoryStore.bookings[idx].confirmedAt = Date.now();
+        targetBooking = memoryStore.bookings[idx];
+      } else {
+        targetBooking = memoryStore.bookings[idx];
+        memoryStore.bookings[idx].status = "rejected";
+        const removed = memoryStore.bookings.splice(idx, 1)[0];
+        if (removed?.gcashRefNumber) {
+          memoryStore.usedRefs.delete(removed.gcashRefNumber);
+        }
+      }
+    }
+
+    if (scriptUrl) {
+      try {
+        await fetch(scriptUrl, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            secret: scriptSecret,
+            action: "review_booking",
+            ref,
+            decision,
+            notifyCustomer: true,
+            booking: targetBooking
+          })
+        });
+      } catch (e) {}
+    }
+    return res.status(200).json({ ok: true, booking: targetBooking });
+  }
+
+  // 4. Toggle Block/Unblock Slot Globally
   if (action === "toggle_block") {
     if (!scriptUrl) return res.status(200).json({ ok: true });
     try {
@@ -100,7 +153,7 @@ export default async function handler(req, res) {
     }
   }
 
-  // 4. Change Owner Password Globally in Google Sheet
+  // 5. Change Owner Password Globally
   if (action === "change_pin") {
     if (!scriptUrl) return res.status(500).json({ error: "Database URL not configured." });
     try {
@@ -124,8 +177,10 @@ export default async function handler(req, res) {
     }
   }
 
-  // 5. Reset All Test Data Globally in Google Sheet
+  // 6. Reset All Test Data Globally
   if (action === "reset_all") {
+    memoryStore.bookings = [];
+    memoryStore.usedRefs.clear();
     if (!scriptUrl) return res.status(200).json({ ok: true });
     try {
       const r = await fetch(scriptUrl, {
