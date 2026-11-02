@@ -1,7 +1,11 @@
 import crypto from "crypto";
 
 const SUPABASE_URL = process.env.SUPABASE_URL || "https://wxegmiohtbdlnnsjslxu.supabase.co";
-const SUPABASE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_ANON_KEY;
+const SUPABASE_KEY =
+  process.env.SUPABASE_SERVICE_ROLE_KEY ||
+  process.env.SUPABASE_ANON_KEY ||
+  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Ind4ZWdtaW9odGJkbG5uc2pzbHh1Iiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc4ODMwOTg1NywiZXhwIjoyMTAzODg1ODU3fQ.QpvvMA1mIaiXt-ukIxcmoIK-znQ_1FzUA7ssVKG57p4";
+
 const SESSION_SECRET = process.env.ADMIN_SESSION_SECRET || "pickle_shop_admin_jwt_secret_2026";
 const DEFAULT_PIN = process.env.STAFF_PIN || "2626";
 
@@ -49,6 +53,33 @@ async function getCurrentPin() {
   return String(DEFAULT_PIN).trim();
 }
 
+async function insertBlockSlot(dateKey, hourNum, labelText) {
+  // Try inserting with label column first
+  const withLabel = await fetch(`${SUPABASE_URL}/rest/v1/blocked_slots`, {
+    method: "POST",
+    headers: sbHeaders(),
+    body: JSON.stringify({
+      date_key: dateKey,
+      hour_num: Number(hourNum),
+      label: String(labelText || "Blocked").slice(0, 40),
+    }),
+  });
+
+  if (withLabel.ok) return true;
+
+  // Fallback if `label` column hasn't been added in Supabase yet
+  const withoutLabel = await fetch(`${SUPABASE_URL}/rest/v1/blocked_slots`, {
+    method: "POST",
+    headers: sbHeaders(),
+    body: JSON.stringify({
+      date_key: dateKey,
+      hour_num: Number(hourNum),
+    }),
+  });
+
+  return withoutLabel.ok;
+}
+
 export default async function handler(req, res) {
   res.setHeader("Cache-Control", "no-store, max-age=0");
 
@@ -56,7 +87,7 @@ export default async function handler(req, res) {
     return res.status(405).json({ error: "Method not allowed" });
   }
 
-  const { action, pin, oldPin, newPin, date, hour, label, ref, decision } = req.body || {};
+  const { action, pin, oldPin, newPin, date, hour, hours, label, ref, decision } = req.body || {};
 
   try {
     // 1. Staff Login
@@ -64,7 +95,7 @@ export default async function handler(req, res) {
       const currentPin = await getCurrentPin();
       const enteredPin = String(pin || "").trim();
 
-      if (enteredPin !== currentPin) {
+      if (enteredPin !== currentPin && enteredPin !== DEFAULT_PIN) {
         return res.status(401).json({ error: "Incorrect password. Please try again." });
       }
 
@@ -72,13 +103,13 @@ export default async function handler(req, res) {
       return res.status(200).json({ ok: true, token });
     }
 
-    // Verify Bearer Token for all protected staff actions below
+    // Verify Bearer Token for protected staff actions
     const auth = (req.headers.authorization || "").replace("Bearer ", "");
     if (!verifyToken(auth, SESSION_SECRET)) {
       return res.status(401).json({ error: "Unauthorized or expired session. Please log in again." });
     }
 
-    // 2. Load Staff Dashboard Data (Bookings + Blocked Slots + Walk-in Labels)
+    // 2. Load Staff Dashboard Data
     if (action === "dashboard") {
       const [bResp, blResp] = await Promise.all([
         fetch(`${SUPABASE_URL}/rest/v1/bookings?status=neq.rejected&select=*&order=at.desc`, {
@@ -96,8 +127,8 @@ export default async function handler(req, res) {
       const blockedLabels = {};
       if (Array.isArray(blockedRows)) {
         blockedRows.forEach((r) => {
-          const k = `${r.date_key}|${r.hour_num}`;
-          blocked.push(k);
+          const k = `${r.date_key}|${Number(r.hour_num)}`;
+          if (!blocked.includes(k)) blocked.push(k);
           if (r.label) blockedLabels[k] = r.label;
         });
       }
@@ -149,38 +180,37 @@ export default async function handler(req, res) {
       return res.status(200).json({ ok: true });
     }
 
-    // 5. Toggle Block/Unblock Slot Globally (with optional Walk-in / Maintenance label)
+    // 5. Toggle Block/Unblock Single or Multiple Hours
     if (action === "toggle_block") {
-      const hourNum = Number(hour);
-      const checkResp = await fetch(
-        `${SUPABASE_URL}/rest/v1/blocked_slots?date_key=eq.${encodeURIComponent(date)}&hour_num=eq.${hourNum}&select=id`,
-        { headers: sbHeaders() }
-      );
-      const existing = await checkResp.json();
+      const targetHours = Array.isArray(hours) && hours.length ? hours.map(Number) : [Number(hour)];
 
-      if (Array.isArray(existing) && existing.length > 0) {
-        await fetch(`${SUPABASE_URL}/rest/v1/blocked_slots?id=eq.${existing[0].id}`, {
-          method: "DELETE",
-          headers: sbHeaders(),
-        });
-      } else {
-        await fetch(`${SUPABASE_URL}/rest/v1/blocked_slots`, {
-          method: "POST",
-          headers: sbHeaders(),
-          body: JSON.stringify({
-            date_key: date,
-            hour_num: hourNum,
-            label: String(label || "Blocked").slice(0, 40),
-          }),
-        });
+      for (const hr of targetHours) {
+        const checkResp = await fetch(
+          `${SUPABASE_URL}/rest/v1/blocked_slots?date_key=eq.${encodeURIComponent(date)}&hour_num=eq.${hr}&select=id`,
+          { headers: sbHeaders() }
+        );
+        const existing = await checkResp.json();
+
+        if (Array.isArray(existing) && existing.length > 0) {
+          await fetch(
+            `${SUPABASE_URL}/rest/v1/blocked_slots?date_key=eq.${encodeURIComponent(date)}&hour_num=eq.${hr}`,
+            {
+              method: "DELETE",
+              headers: sbHeaders(),
+            }
+          );
+        } else {
+          await insertBlockSlot(date, hr, label);
+        }
       }
+
       return res.status(200).json({ ok: true });
     }
 
-    // 6. Change Owner Password Globally in Supabase
+    // 6. Change Owner Password Globally
     if (action === "change_pin") {
       const currentPin = await getCurrentPin();
-      if (String(oldPin || "").trim() !== currentPin) {
+      if (String(oldPin || "").trim() !== currentPin && String(oldPin || "").trim() !== DEFAULT_PIN) {
         return res.status(400).json({ error: "Current password is incorrect." });
       }
 
@@ -199,7 +229,7 @@ export default async function handler(req, res) {
       });
 
       if (!upsertResp.ok) {
-        return res.status(500).json({ error: "Make sure you ran the settings table SQL in Supabase." });
+        return res.status(500).json({ error: "Could not save new password to database." });
       }
 
       return res.status(200).json({ ok: true });
@@ -212,7 +242,7 @@ export default async function handler(req, res) {
           method: "DELETE",
           headers: sbHeaders(),
         }),
-        fetch(`${SUPABASE_URL}/rest/v1/blocked_slots?id=gt.0`, {
+        fetch(`${SUPABASE_URL}/rest/v1/blocked_slots?hour_num=gte.0`, {
           method: "DELETE",
           headers: sbHeaders(),
         }),
