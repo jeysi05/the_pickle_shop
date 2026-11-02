@@ -9,6 +9,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Shrikhand&family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,500;12..96,700;12..96,800&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
 :root{
   --green:#1d9a2a;
@@ -41,19 +42,11 @@ header{display:flex;align-items:center;justify-content:space-between;padding:14p
 .btn.danger{background:var(--paper);color:var(--danger);border-color:var(--danger);box-shadow:3px 3px 0 var(--danger)}
 .btn.sm{padding:7px 12px;font-size:.8rem;border-radius:9px;box-shadow:2px 2px 0 var(--deep)}
 
-/* Login Card */
-.auth-wrap{max-width:420px;margin:8vh auto;padding:0 20px}
-.auth-card{background:var(--paper);border:3px solid var(--deep);border-radius:20px;padding:28px 26px;box-shadow:6px 6px 0 var(--deep)}
-.auth-card h1{font-family:'Shrikhand';font-weight:400;font-size:1.9rem;color:var(--deep);margin-bottom:6px}
-.auth-card p{color:var(--muted);font-size:.92rem;margin-bottom:18px}
-label{display:block;font-weight:700;font-size:.85rem;margin:12px 0 6px}
-input[type=password],input[type=text],input[type=date]{width:100%;padding:12px 14px;border:2px solid var(--line);border-radius:12px;background:#fff}
+input[type=date]{width:100%;padding:12px 14px;border:2px solid var(--line);border-radius:12px;background:#fff}
 input:focus{outline:none;border-color:var(--grape);box-shadow:0 0 0 4px rgba(182,79,224,.15)}
-.err{color:var(--danger);font-size:.82rem;margin-top:6px;min-height:1.1em;font-weight:700}
 
 /* Dashboard */
-.dash{display:none;max-width:1120px;margin:0 auto;padding:30px 5vw 90px}
-.dash.on{display:block}
+.dash{display:block;max-width:1120px;margin:0 auto;padding:30px 5vw 90px}
 .top{display:flex;justify-content:space-between;align-items:center;margin-bottom:24px;gap:14px;flex-wrap:wrap}
 .top h2{font-family:'Shrikhand';font-weight:400;font-size:2.1rem;color:var(--deep)}
 .controls{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
@@ -101,7 +94,6 @@ th{background:var(--deep);color:var(--cream);font-size:.74rem;letter-spacing:.1e
 .modal-scrim.on{display:grid}
 .modal{background:var(--paper);border:3px solid var(--deep);border-radius:20px;padding:26px;width:min(440px,100%);box-shadow:6px 6px 0 var(--deep)}
 .modal h3{font-family:'Shrikhand';font-weight:400;font-size:1.5rem;color:var(--deep);margin-bottom:6px}
-.modal p{font-size:.86rem;color:var(--muted);margin-bottom:14px}
 
 .toast{position:fixed;left:50%;bottom:30px;transform:translate(-50%,30px);background:var(--deep);color:var(--cream);padding:12px 20px;border-radius:12px;font-weight:700;z-index:100;opacity:0;pointer-events:none;transition:.25s;border:2px solid var(--ball)}
 .toast.on{opacity:1;transform:translate(-50%,0)}
@@ -119,35 +111,17 @@ th{background:var(--deep);color:var(--cream);font-size:.74rem;letter-spacing:.1e
   <span class="tag">Owner Portal</span>
 </header>
 
-<!-- 1. Login Screen -->
-<main class="auth-wrap" id="authBox">
-  <form class="auth-card" id="loginForm">
-    <h1>Owner Login</h1>
-    <p>Enter your owner password to verify GCash receipts, manage court slots, and view player bookings.</p>
-    <label for="pwInput">Password</label>
-    <input type="password" id="pwInput" placeholder="Enter password" autocomplete="current-password" required>
-    <div class="err" id="loginErr"></div>
-    <button type="submit" class="btn" style="width:100%;margin-top:8px">Unlock Dashboard →</button>
-    <div style="margin-top:16px;text-align:center;font-size:.82rem;color:var(--muted)">
-      <a href="/" style="text-decoration:underline">← Back to public booking page</a>
-    </div>
-  </form>
-</main>
-
-<!-- 2. Authenticated Owner Dashboard -->
 <section class="dash" id="dashBox">
   <div class="top">
     <div>
       <h2>Schedule &amp; Booking Manager</h2>
-      <div style="font-size:.88rem;color:var(--muted)">Selected Date: <strong id="currentDateLabel" style="color:var(--deep)"></strong> · <span style="color:var(--green);font-weight:700">● Live Auto-Sync Active</span></div>
+      <div style="font-size:.88rem;color:var(--muted)">Selected Date: <strong id="currentDateLabel" style="color:var(--deep)"></strong> · <span style="color:var(--green);font-weight:700" id="syncBadge">● Live Supabase Realtime Active</span></div>
     </div>
     <div class="controls">
       <input type="date" id="staffDatePicker" min="2026-11-23" style="width:auto;padding:9px 12px;font-weight:700">
       <button type="button" class="btn ghost" id="enablePushBtn">🔔 Enable Alerts</button>
       <button type="button" class="btn ghost" id="refreshBtn">↻ Refresh</button>
-      <button type="button" class="btn ghost" id="changePwBtn">Change Password</button>
       <button type="button" class="btn danger" id="resetDataBtn">Reset All Data</button>
-      <button type="button" class="btn ghost" id="logoutBtn">Log Out</button>
     </div>
   </div>
 
@@ -186,31 +160,7 @@ th{background:var(--deep);color:var(--cream);font-size:.74rem;letter-spacing:.1e
   </div>
 </section>
 
-<!-- 3. Self-Service Change Password Modal -->
-<div class="modal-scrim" id="pwModal">
-  <form class="modal" id="pwForm">
-    <h3>Change Owner Password</h3>
-    <p>Update your dashboard password anytime. You will use this new password the next time you log in.</p>
-
-    <label for="oldPw">Current Password</label>
-    <input type="password" id="oldPw" required placeholder="Enter current password">
-
-    <label for="newPw">New Password</label>
-    <input type="password" id="newPw" required minlength="4" placeholder="At least 4 characters">
-
-    <label for="confPw">Confirm New Password</label>
-    <input type="password" id="confPw" required minlength="4" placeholder="Re-enter new password">
-
-    <div class="err" id="pwErr"></div>
-
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px">
-      <button type="button" class="btn ghost" id="cancelPwBtn">Cancel</button>
-      <button type="submit" class="btn">Save Password</button>
-    </div>
-  </form>
-</div>
-
-<!-- 4. Full Receipt Preview Modal -->
+<!-- Full Receipt Preview Modal -->
 <div class="modal-scrim" id="imgModal" onclick="this.classList.remove('on')">
   <div class="modal" style="width:min(520px,100%);text-align:center" onclick="event.stopPropagation()">
     <h3 id="imgModalTitle">GCash Receipt</h3>
@@ -222,9 +172,11 @@ th{background:var(--deep);color:var(--cream);font-size:.74rem;letter-spacing:.1e
 <div class="toast" id="toast"></div>
 
 <script>
+const SUPABASE_URL = "https://wxegmiohtbdlnnsjslxu.supabase.co";
+const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Ind4ZWdtaW9odGJkbG5uc2pzbHh1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODgzMDk4NTcsImV4cCI6MjEwMzg4NTg1N30.sJvvu7ubKE6aMBYmznlgr_Z8Qiz9PcGJ9dQNJdW7IMQ";
+
 const CONFIG = {
   START_DATE: "2026-11-23",
-  DEFAULT_PIN: "2030",
   getHoursForDate(dateKey) {
     const [y, m, d] = dateKey.split("-").map(Number);
     const dow = new Date(y, m - 1, d).getDay();
@@ -233,8 +185,12 @@ const CONFIG = {
   }
 };
 
-const KEY = "pickleshop-live-v3";
-const TOKEN_KEY = "tps_owner_jwt";
+// Clear old local storage caches so mobile & laptop strictly use live Supabase state
+try {
+  localStorage.removeItem("pickleshop-live-v1");
+  localStorage.removeItem("pickleshop-live-v2");
+  localStorage.removeItem("pickleshop-live-v3");
+} catch(e){}
 
 const $ = id => document.getElementById(id);
 const peso = n => "₱" + Number(n).toLocaleString("en-PH", { minimumFractionDigits: n % 1 === 0 ? 0 : 2, maximumFractionDigits: 2 });
@@ -261,10 +217,7 @@ function getBaseDate(){
   return todayLocal > minDate ? todayLocal : minDate;
 }
 
-let db = (()=>{ try{ return JSON.parse(localStorage.getItem(KEY)) }catch(e){return null} })() || {bookings:[], blocked:[]};
-function save(){ try{ localStorage.setItem(KEY, JSON.stringify(db)) }catch(e){} }
-
-let staffToken = sessionStorage.getItem(TOKEN_KEY) || "";
+let db = { bookings: [], blocked: [] };
 let staffDate = dkey(getBaseDate());
 $("staffDatePicker").value = staffDate;
 
@@ -278,7 +231,6 @@ window.previewReceipt = previewReceipt;
 /* ---------- Staff Real-Time Booking Alert (Sound + Browser Push) ---------- */
 let knownPendingRefs = new Set();
 let isFirstLoad = true;
-let staffPollTimer = null;
 
 function playStaffAlertSound(){
   try {
@@ -301,11 +253,7 @@ function playStaffAlertSound(){
 function updatePushBtnState(){
   const btn = $("enablePushBtn");
   if(!btn || !("Notification" in window)) return;
-  if(Notification.permission === "granted"){
-    btn.textContent = "🔔 Alerts On";
-  } else {
-    btn.textContent = "🔔 Enable Alerts";
-  }
+  btn.textContent = Notification.permission === "granted" ? "🔔 Alerts On" : "🔔 Enable Alerts";
 }
 
 $("enablePushBtn").onclick = async () => {
@@ -316,11 +264,7 @@ $("enablePushBtn").onclick = async () => {
   }
   const perm = await Notification.requestPermission();
   updatePushBtnState();
-  if(perm === "granted"){
-    toast("🔔 Browser & Sound notifications enabled!");
-  } else {
-    toast("Sound alerts enabled! Allow browser notifications in settings if needed.");
-  }
+  toast(perm === "granted" ? "🔔 Browser & Sound notifications enabled!" : "Sound alerts enabled!");
 };
 
 function checkAndNotifyNewBookings(bookingsList){
@@ -355,96 +299,28 @@ function buildSmsLink(b){
   return `sms:${phone}?body=${encodeURIComponent(body)}`;
 }
 
-/* ---------- Login & Session Flow ---------- */
-async function showDashboard(){
-  $("authBox").style.display = "none";
-  $("dashBox").classList.add("on");
-  updatePushBtnState();
-  if("Notification" in window && Notification.permission === "default"){
-    Notification.requestPermission().then(updatePushBtnState).catch(()=>{});
-  }
-  await syncFromServer();
-  clearInterval(staffPollTimer);
-  staffPollTimer = setInterval(syncFromServer, 12000);
-}
-
+/* ---------- Live Sync From Supabase / API ---------- */
 async function syncFromServer(){
   try {
-    const r = await fetch("/api/staff", {
+    const r = await fetch(`/api/staff?_=${Date.now()}`, {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "Authorization": `Bearer ${staffToken}`
-      },
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ action: "dashboard", date: staffDate })
     });
-    if (r.status === 401) {
-      sessionStorage.removeItem(TOKEN_KEY);
-      staffToken = "";
-      clearInterval(staffPollTimer);
-      $("dashBox").classList.remove("on");
-      $("authBox").style.display = "block";
-      return;
-    }
     if (r.ok) {
       const data = await r.json();
-      const serverBookings = Array.isArray(data.bookings) ? data.bookings : [];
-      const localMap = new Map();
-      (db.bookings || []).forEach(b => { if(b && b.ref) localMap.set(b.ref, b); });
-      serverBookings.forEach(b => { if(b && b.ref) localMap.set(b.ref, b); });
-      db.bookings = [...localMap.values()];
-      if (Array.isArray(data.blocked)) db.blocked = data.blocked;
-      save();
+      db.bookings = Array.isArray(data.bookings) ? data.bookings : [];
+      db.blocked = Array.isArray(data.blocked) ? data.blocked : [];
     }
   } catch (e) {}
   checkAndNotifyNewBookings(db.bookings);
   renderDashboard();
 }
+window.syncFromServer = syncFromServer;
 
 $("refreshBtn").onclick = () => {
   syncFromServer();
-  toast("Refreshed bookings!");
-};
-
-$("loginForm").onsubmit = async (e) => {
-  e.preventDefault();
-  const entered = $("pwInput").value.trim();
-  $("loginErr").textContent = "";
-  const btn = $("loginForm").querySelector("button[type=submit]");
-  btn.disabled = true;
-  btn.textContent = "Checking…";
-
-  try {
-    const r = await fetch("/api/staff", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ action: "login", pin: entered })
-    });
-    const d = await r.json();
-    if (r.ok && d.token) {
-      staffToken = d.token;
-      sessionStorage.setItem(TOKEN_KEY, staffToken);
-      $("pwInput").value = "";
-      await showDashboard();
-      toast("Welcome back!");
-    } else {
-      $("loginErr").textContent = d.error || "Incorrect password. Please try again.";
-    }
-  } catch (err) {
-    $("loginErr").textContent = "Network error. Please try again.";
-  } finally {
-    btn.disabled = false;
-    btn.textContent = "Unlock Dashboard →";
-  }
-};
-
-$("logoutBtn").onclick = () => {
-  sessionStorage.removeItem(TOKEN_KEY);
-  staffToken = "";
-  clearInterval(staffPollTimer);
-  $("dashBox").classList.remove("on");
-  $("authBox").style.display = "block";
-  toast("Logged out.");
+  toast("Synced live bookings from Supabase!");
 };
 
 /* ---------- Confirm or Reject Pending GCash Payment ---------- */
@@ -459,17 +335,13 @@ async function reviewBooking(ref, decision){
     } else {
       db.bookings.splice(idx, 1);
     }
-    save();
     renderDashboard();
   }
 
   try {
     await fetch("/api/staff", {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "Authorization": `Bearer ${staffToken}`
-      },
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ action: "review_booking", ref, decision, bookingData: targetBooking })
     });
     toast(decision === "confirm"
@@ -477,56 +349,10 @@ async function reviewBooking(ref, decision){
       : `Booking ${ref} rejected & slot reopened.`);
     await syncFromServer();
   } catch (err) {
-    toast("Updated locally.");
+    toast("Error updating booking. Please refresh.");
   }
 }
 window.reviewBooking = reviewBooking;
-
-/* ---------- Self-Service Change Password ---------- */
-$("changePwBtn").onclick = () => {
-  $("oldPw").value = "";
-  $("newPw").value = "";
-  $("confPw").value = "";
-  $("pwErr").textContent = "";
-  $("pwModal").classList.add("on");
-};
-$("cancelPwBtn").onclick = () => $("pwModal").classList.remove("on");
-
-$("pwForm").onsubmit = async (e) => {
-  e.preventDefault();
-  const oldPin = $("oldPw").value.trim();
-  const newPin = $("newPw").value.trim();
-  const confPin = $("confPw").value.trim();
-
-  if (newPin.length < 4) {
-    $("pwErr").textContent = "New password must be at least 4 characters.";
-    return;
-  }
-  if (newPin !== confPin) {
-    $("pwErr").textContent = "New passwords do not match.";
-    return;
-  }
-
-  try {
-    const r = await fetch("/api/staff", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "Authorization": `Bearer ${staffToken}`
-      },
-      body: JSON.stringify({ action: "change_pin", oldPin, newPin })
-    });
-    const d = await r.json();
-    if (r.ok && d.ok) {
-      $("pwModal").classList.remove("on");
-      toast("Password updated across all devices!");
-    } else {
-      $("pwErr").textContent = d.error || "Current password is incorrect.";
-    }
-  } catch (err) {
-    $("pwErr").textContent = "Failed to update password. Try again.";
-  }
-};
 
 /* ---------- Render Schedule & Bookings ---------- */
 function renderDashboard(){
@@ -547,7 +373,6 @@ function renderDashboard(){
     <div class="kpi"><small>Court Utilization</small><b>${Math.round(hrs / openHrs * 100)}%</b></div>
   `;
 
-  // Render Pending Payment Review Cards
   $("reviewCountBadge").textContent = pendingAll.length;
   $("reviewGrid").innerHTML = pendingAll.length
     ? pendingAll.map(b => `
@@ -575,7 +400,6 @@ function renderDashboard(){
       </div>`).join("")
     : `<div style="color:var(--muted);font-size:.9rem;padding:8px 0">No pending GCash receipts waiting for verification.</div>`;
 
-  // Render Hour Block Grid
   let blkHtml = "";
   for(let h = open; h < close; h++){
     const matchingBooking = db.bookings.find(b => b.date === staffDate && (b.status === "confirmed" || b.status === "payment_review") && Array.isArray(b.hours) && b.hours.includes(h));
@@ -598,7 +422,6 @@ function renderDashboard(){
   }
   $("blkGrid").innerHTML = blkHtml;
 
-  // Render All Bookings Table
   const all = [...db.bookings].sort((a,b) => (b.at || 0) - (a.at || 0));
   $("bookingsBody").innerHTML = all.length
     ? all.map(b => `
@@ -644,42 +467,51 @@ $("blkGrid").onclick = async (e) => {
     db.blocked.push(k);
     toast("Slot blocked!");
   }
-  save();
   renderDashboard();
 
   try {
     await fetch("/api/staff", {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "Authorization": `Bearer ${staffToken}`
-      },
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ action: "toggle_block", date: staffDate, hour: h })
     });
+    await syncFromServer();
   } catch (err) {}
 };
 
 $("resetDataBtn").onclick = async () => {
-  if(!confirm("Are you sure you want to clear all test bookings and blocked slots?")) return;
+  if(!confirm("Are you sure you want to clear all bookings and blocked slots across all devices?")) return;
   db = { bookings: [], blocked: [] };
-  save();
   renderDashboard();
   try {
     await fetch("/api/staff", {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "Authorization": `Bearer ${staffToken}`
-      },
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ action: "reset_all" })
     });
     toast("All bookings and blocked slots cleared globally!");
+    await syncFromServer();
   } catch (err) {}
 };
-//test
-if(staffToken){
-  showDashboard();
-}
+
+/* ---------- Initialize & Subscribe to Supabase Realtime WebSockets ---------- */
+(async function initStaffPortal(){
+  updatePushBtnState();
+  await syncFromServer();
+  setInterval(syncFromServer, 8000);
+
+  if (window.supabase) {
+    const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    sb.channel("staff-realtime-channel")
+      .on("postgres_changes", { event: "*", schema: "public", table: "bookings" }, () => {
+        syncFromServer();
+      })
+      .on("postgres_changes", { event: "*", schema: "public", table: "blocked_slots" }, () => {
+        syncFromServer();
+      })
+      .subscribe();
+  }
+})();
 </script>
 </body>
 </html>

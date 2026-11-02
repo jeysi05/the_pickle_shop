@@ -1,199 +1,121 @@
-// api/staff.js
-import crypto from "crypto";
+const SUPABASE_URL = process.env.SUPABASE_URL || "https://wxegmiohtbdlnnsjslxu.supabase.co";
+const SUPABASE_KEY =
+  process.env.SUPABASE_SERVICE_ROLE_KEY ||
+  process.env.SUPABASE_ANON_KEY ||
+  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Ind4ZWdtaW9odGJkbG5uc2pzbHh1Iiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc4ODMwOTg1NywiZXhwIjoyMTAzODg1ODU3fQ.QpvvMA1mIaiXt-ukIxcmoIK-znQ_1FzUA7ssVKG57p4";
 
-const memoryStore =
-  globalThis.__tpsDirectStore ||
-  (globalThis.__tpsDirectStore = {
-    bookings: [],
-    usedRefs: new Set(),
-  });
-
-function signToken(payload, secret) {
-  const data = Buffer.from(JSON.stringify(payload)).toString("base64url");
-  const sig = crypto.createHmac("sha256", secret).update(data).digest("base64url");
-  return `${data}.${sig}`;
-}
-
-function verifyToken(token, secret) {
-  try {
-    if (!token || typeof token !== "string" || !token.includes(".")) return null;
-    const [data, sig] = token.split(".");
-    const expected = crypto.createHmac("sha256", secret).update(data).digest("base64url");
-    if (sig !== expected) return null;
-    const payload = JSON.parse(Buffer.from(data, "base64url").toString("utf8"));
-    if (!payload.exp || Date.now() > payload.exp) return null;
-    return payload;
-  } catch (e) {
-    return null;
-  }
+function sbHeaders() {
+  return {
+    apikey: SUPABASE_KEY,
+    Authorization: `Bearer ${SUPABASE_KEY}`,
+    "Content-Type": "application/json",
+    Prefer: "return=representation",
+  };
 }
 
 export default async function handler(req, res) {
   res.setHeader("Cache-Control", "no-store, max-age=0");
-  const fallbackPin = process.env.STAFF_PIN || "2626";
-  const sessionSecret = process.env.ADMIN_SESSION_SECRET || "pickle_shop_admin_jwt_secret_2026";
-  const scriptUrl = process.env.APPS_SCRIPT_URL;
-  const scriptSecret = process.env.APPS_SCRIPT_SECRET || "tps_secret_2026";
 
-  if (req.method !== "POST") {
-    return res.status(405).json({ error: "Method not allowed" });
-  }
+  // Support both GET and POST for dashboard loading
+  const action = req.method === "GET" ? "dashboard" : req.body?.action;
+  const { date, hour, ref, decision } = req.body || {};
 
-  const { action, pin, oldPin, newPin, date, hour, ref, decision, bookingData } = req.body || {};
+  try {
+    // 1. Load Staff Dashboard Data (Bookings + Blocked Slots)
+    if (action === "dashboard") {
+      const [bResp, blResp] = await Promise.all([
+        fetch(`${SUPABASE_URL}/rest/v1/bookings?status=neq.rejected&select=*&order=at.desc`, {
+          headers: sbHeaders(),
+        }),
+        fetch(`${SUPABASE_URL}/rest/v1/blocked_slots?select=*`, {
+          headers: sbHeaders(),
+        }),
+      ]);
 
-  // 1. Staff Login
-  if (action === "login") {
-    let isValid = false;
-    if (scriptUrl) {
-      try {
-        const r = await fetch(scriptUrl, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ secret: scriptSecret, action: "verify_pin", pin: String(pin) })
-        });
-        const d = await r.json();
-        isValid = !!d.valid;
-      } catch (e) {
-        isValid = String(pin) === String(fallbackPin);
-      }
-    } else {
-      isValid = String(pin) === String(fallbackPin);
+      const bookings = await bResp.json();
+      const blockedRows = await blResp.json();
+
+      const blocked = Array.isArray(blockedRows)
+        ? blockedRows.map((r) => `${r.date_key}|${r.hour_num}`)
+        : [];
+
+      return res.status(200).json({
+        bookings: Array.isArray(bookings) ? bookings : [],
+        blocked,
+      });
     }
 
-    if (!isValid) {
-      return res.status(401).json({ error: "Incorrect password. Please try again." });
-    }
-
-    const token = signToken({ role: "staff", exp: Date.now() + 12 * 3600 * 1000 }, sessionSecret);
-    return res.status(200).json({ token });
-  }
-
-  // Verify Bearer Token for all protected staff actions below
-  const auth = (req.headers.authorization || "").replace("Bearer ", "");
-  if (!verifyToken(auth, sessionSecret)) {
-    return res.status(401).json({ error: "Unauthorized or expired session. Please log in again." });
-  }
-
-  // 2. Load Staff Dashboard Data
-  if (action === "dashboard") {
-    let sheetBookings = [];
-    let sheetBlocked = [];
-    if (scriptUrl) {
-      try {
-        const r = await fetch(
-          `${scriptUrl}?action=staff_dashboard&date=${encodeURIComponent(date || "")}&secret=${encodeURIComponent(scriptSecret)}`
-        );
-        const data = await r.json();
-        sheetBookings = Array.isArray(data.bookings) ? data.bookings : [];
-        sheetBlocked = Array.isArray(data.blocked) ? data.blocked : [];
-      } catch (err) {}
-    }
-
-    const mergedMap = new Map();
-    sheetBookings.forEach((b) => { if (b && b.ref) mergedMap.set(b.ref, b); });
-    memoryStore.bookings.forEach((b) => { if (b && b.ref) mergedMap.set(b.ref, b); });
-
-    return res.status(200).json({
-      bookings: [...mergedMap.values()],
-      blocked: sheetBlocked
-    });
-  }
-
-  // 3. Approve or Reject Pending GCash Booking & Notify Customer
-  if (action === "review_booking") {
-    let targetBooking = bookingData || null;
-    const idx = memoryStore.bookings.findIndex((b) => b.ref === ref);
-    if (idx >= 0) {
+    // 2. Approve or Reject Pending GCash Booking
+    if (action === "review_booking") {
       if (decision === "confirm") {
-        memoryStore.bookings[idx].status = "confirmed";
-        memoryStore.bookings[idx].confirmedAt = Date.now();
-        targetBooking = memoryStore.bookings[idx];
+        const r = await fetch(
+          `${SUPABASE_URL}/rest/v1/bookings?ref=eq.${encodeURIComponent(ref)}`,
+          {
+            method: "PATCH",
+            headers: sbHeaders(),
+            body: JSON.stringify({ status: "confirmed", confirmedAt: Date.now() }),
+          }
+        );
+        const updated = await r.json();
+        return res.status(200).json({
+          ok: true,
+          booking: Array.isArray(updated) && updated[0] ? updated[0] : null,
+        });
       } else {
-        targetBooking = memoryStore.bookings[idx];
-        memoryStore.bookings[idx].status = "rejected";
-        const removed = memoryStore.bookings.splice(idx, 1)[0];
-        if (removed?.gcashRefNumber) {
-          memoryStore.usedRefs.delete(removed.gcashRefNumber);
-        }
+        // Delete rejected booking so the slot & GCash ref are freed immediately
+        await fetch(
+          `${SUPABASE_URL}/rest/v1/bookings?ref=eq.${encodeURIComponent(ref)}`,
+          {
+            method: "DELETE",
+            headers: sbHeaders(),
+          }
+        );
+        return res.status(200).json({ ok: true, booking: null });
       }
     }
 
-    if (scriptUrl) {
-      try {
-        await fetch(scriptUrl, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            secret: scriptSecret,
-            action: "review_booking",
-            ref,
-            decision,
-            notifyCustomer: true,
-            booking: targetBooking
-          })
+    // 3. Toggle Block/Unblock Slot Globally
+    if (action === "toggle_block") {
+      const hourNum = Number(hour);
+      const checkResp = await fetch(
+        `${SUPABASE_URL}/rest/v1/blocked_slots?date_key=eq.${encodeURIComponent(date)}&hour_num=eq.${hourNum}&select=id`,
+        { headers: sbHeaders() }
+      );
+      const existing = await checkResp.json();
+
+      if (Array.isArray(existing) && existing.length > 0) {
+        await fetch(`${SUPABASE_URL}/rest/v1/blocked_slots?id=eq.${existing[0].id}`, {
+          method: "DELETE",
+          headers: sbHeaders(),
         });
-      } catch (e) {}
-    }
-    return res.status(200).json({ ok: true, booking: targetBooking });
-  }
-
-  // 4. Toggle Block/Unblock Slot Globally
-  if (action === "toggle_block") {
-    if (!scriptUrl) return res.status(200).json({ ok: true });
-    try {
-      const r = await fetch(scriptUrl, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ secret: scriptSecret, action: "toggle_block", date, hour: Number(hour) })
-      });
-      const data = await r.json();
-      return res.status(200).json(data);
-    } catch (err) {
-      return res.status(500).json({ error: "Failed to update slot block." });
-    }
-  }
-
-  // 5. Change Owner Password Globally
-  if (action === "change_pin") {
-    if (!scriptUrl) return res.status(500).json({ error: "Database URL not configured." });
-    try {
-      const r = await fetch(scriptUrl, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          secret: scriptSecret,
-          action: "change_pin",
-          oldPin: String(oldPin),
-          newPin: String(newPin)
-        })
-      });
-      const data = await r.json();
-      if (!data.ok) {
-        return res.status(400).json({ error: data.error || "Could not update password." });
+      } else {
+        await fetch(`${SUPABASE_URL}/rest/v1/blocked_slots`, {
+          method: "POST",
+          headers: sbHeaders(),
+          body: JSON.stringify({ date_key: date, hour_num: hourNum }),
+        });
       }
       return res.status(200).json({ ok: true });
-    } catch (err) {
-      return res.status(500).json({ error: "Failed to update password." });
     }
-  }
 
-  // 6. Reset All Test Data Globally
-  if (action === "reset_all") {
-    memoryStore.bookings = [];
-    memoryStore.usedRefs.clear();
-    if (!scriptUrl) return res.status(200).json({ ok: true });
-    try {
-      const r = await fetch(scriptUrl, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ secret: scriptSecret, action: "reset_all" })
-      });
-      const data = await r.json();
-      return res.status(200).json(data);
-    } catch (err) {
-      return res.status(500).json({ error: "Failed to reset data." });
+    // 4. Reset All Test Data Globally
+    if (action === "reset_all") {
+      await Promise.all([
+        fetch(`${SUPABASE_URL}/rest/v1/bookings?ref=neq.___none___`, {
+          method: "DELETE",
+          headers: sbHeaders(),
+        }),
+        fetch(`${SUPABASE_URL}/rest/v1/blocked_slots?id=gt.0`, {
+          method: "DELETE",
+          headers: sbHeaders(),
+        }),
+      ]);
+      return res.status(200).json({ ok: true });
     }
-  }
 
-  return res.status(400).json({ error: "Unknown action" });
+    return res.status(200).json({ ok: true });
+  } catch (err) {
+    console.error("Staff API error:", err);
+    return res.status(500).json({ error: "Server error in staff endpoint." });
+  }
 }

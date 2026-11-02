@@ -9,6 +9,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Shrikhand&family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,500;12..96,700;12..96,800&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
 :root{
   --green:#1d9a2a;
@@ -318,7 +319,6 @@ input.bad{border-color:var(--danger)}
         </div>
       </div>
 
-      <!-- Visual Month Calendar + Day Strip starting Nov 23 -->
       <div class="cal-layout">
         <div class="cal-box">
           <div class="cal-head">
@@ -351,14 +351,14 @@ input.bad{border-color:var(--danger)}
         </div>
       </div>
 
-      <p class="hint">Times are Philippine time. Once you upload your GCash receipt, your slot is automatically held on the calendar.</p>
+      <p class="hint">Times are Philippine time. Once you upload your GCash receipt, your slot is automatically held on the calendar in real time.</p>
     </div>
   </section>
 
   <section class="how" id="how">
     <h2>Book in under a minute.</h2>
     <div class="steps">
-      <div class="step"><div class="n">1</div><div><h4>Pick a day (starting Nov 23) and time</h4><p>The schedule is live. Each slot box is 1 full hour—if a slot shows open, it's open.</p></div></div>
+      <div class="step"><div class="n">1</div><div><h4>Pick a day (starting Nov 23) and time</h4><p>The schedule is live across all devices. Each slot box is 1 full hour—if a slot shows open, it's open.</p></div></div>
       <div class="step"><div class="n">2</div><div><h4>Scan our Direct GCash QR &amp; Upload Receipt</h4><p>Pay the exact court amount via InstaPay / GCash QR and upload your payment screenshot. Our automated reader checks the receipt details and holds your slot immediately.</p></div></div>
       <div class="step"><div class="n">3</div><div><h4>Get notified &amp; receive your gate pass</h4><p>You'll get an instant confirmation alert once staff verifies your transfer. Save your pass and show up to play!</p></div></div>
     </div>
@@ -440,12 +440,12 @@ input.bad{border-color:var(--danger)}
 <div class="toast" id="toast"></div>
 
 <script>
-/* ==========================================================
-   THE PICKLE SHOP — PUBLIC BOOKING CONFIGURATION
-   ========================================================== */
+const SUPABASE_URL = "https://wxegmiohtbdlnnsjslxu.supabase.co";
+const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Ind4ZWdtaW9odGJkbG5uc2pzbHh1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODgzMDk4NTcsImV4cCI6MjEwMzg4NTg1N30.sJvvu7ubKE6aMBYmznlgr_Z8Qiz9PcGJ9dQNJdW7IMQ";
+
 const CONFIG = {
   NAME: "The Pickle Shop",
-  START_DATE: "2026-11-23", // Strictly opens on Monday, Nov 23, 2026
+  START_DATE: "2026-11-23",
   DAYS_AHEAD: 35,
   HOLD_SECONDS: 600,
   QR_IMAGE_URL: "pickleshop-gcash-qr.jpg",
@@ -464,32 +464,13 @@ const CONFIG = {
   FB_URL: "https://www.facebook.com/profile.php?id=61595225496202"
 };
 
-/* ---------- Shared Store (Synced with Private Staff Portal & API) ---------- */
-const KEY = "pickleshop-live-v3";
+// Clear old localStorage caches so every device strictly reads live Supabase availability
 try {
   localStorage.removeItem("pickleshop-live-v1");
   localStorage.removeItem("pickleshop-live-v2");
+  localStorage.removeItem("pickleshop-live-v3");
 } catch(e) {}
 
-let db = (()=>{ try{ return JSON.parse(localStorage.getItem(KEY)) }catch(e){return null} })() || {bookings:[], blocked:[]};
-function save(){ try{ localStorage.setItem(KEY, JSON.stringify(db)) }catch(e){} }
-
-function localTaken(dateKey){
-  try {
-    const fresh = JSON.parse(localStorage.getItem(KEY));
-    if (fresh) db = fresh;
-  } catch(e) {}
-  const t = new Set();
-  db.bookings.forEach(b=>{
-    if(b.date===dateKey && (b.status==="confirmed" || b.status==="payment_review")){
-      (b.hours||[]).forEach(h=>t.add(h));
-    }
-  });
-  db.blocked.forEach(k=>{ const [d,h]=k.split("|"); if(d===dateKey) t.add(+h); });
-  return [...t];
-}
-
-/* ---------- Helpers ---------- */
 const $ = id => document.getElementById(id);
 const peso = n => "₱" + Number(n).toLocaleString("en-PH", { minimumFractionDigits: n % 1 === 0 ? 0 : 2, maximumFractionDigits: 2 });
 const pad = n => String(n).padStart(2,"0");
@@ -508,7 +489,6 @@ const shortDate = k => parseKey(k).toLocaleDateString("en-PH",{weekday:"short",m
 const hasHour = hrs => `${hLabel(hrs[0])} – ${hLabel(hrs[hrs.length-1]+1)}`;
 function toast(m){ const t=$("toast"); t.textContent=m; t.classList.add("on"); clearTimeout(toast._t); toast._t=setTimeout(()=>t.classList.remove("on"),3800); }
 
-/* ---------- Strictly Start on November 23, 2026 (or Today if after Nov 23) ---------- */
 function getBaseDate(){
   const now = new Date();
   const todayLocal = new Date(now.getFullYear(), now.getMonth(), now.getDate());
@@ -516,7 +496,6 @@ function getBaseDate(){
   return todayLocal > minDate ? todayLocal : minDate;
 }
 
-/* ---------- State ---------- */
 const baseDateObj = getBaseDate();
 let date = dkey(baseDateObj);
 let calYear = baseDateObj.getFullYear();
@@ -530,7 +509,6 @@ let customerPollTimer = null;
 
 function subtotal(){ return sel.reduce((s,h)=>s+CONFIG.PRICE(h),0); }
 
-/* ---------- Render: Interactive Month Calendar ---------- */
 function renderMonthCalendar(){
   const firstDay = new Date(calYear, calMonth, 1);
   const daysInMonth = new Date(calYear, calMonth + 1, 0).getDate();
@@ -595,7 +573,6 @@ function selectDate(newDateKey){
   updateBar();
 }
 
-/* ---------- Render: Horizontal Day Strip ---------- */
 function renderDays(){
   const box = $("days"); box.innerHTML="";
   const base = getBaseDate();
@@ -613,21 +590,21 @@ function renderDays(){
   }
 }
 
-/* ---------- Render: Slots ---------- */
+/* ---------- Render: Live Slots From Supabase ---------- */
 async function loadSlots(){
   try{
-    const r = await fetch(`/api/schedule?date=${encodeURIComponent(date)}`);
+    const r = await fetch(`/api/schedule?date=${encodeURIComponent(date)}&_=${Date.now()}`);
     if(r.ok){
       const data = await r.json();
-      taken = [...new Set([...localTaken(date), ...(Array.isArray(data.taken) ? data.taken : [])])];
-    } else {
-      taken = localTaken(date);
+      taken = Array.isArray(data.taken) ? data.taken : [];
     }
-  }catch(e){
-    taken = localTaken(date);
-  }
+  }catch(e){}
+  // Deselect any hour that was just booked by someone else in real-time
+  sel = sel.filter(h => !taken.includes(h));
+  updateBar();
   renderSlots();
 }
+window.loadSlots = loadSlots;
 
 function isPast(h){
   const now = new Date();
@@ -696,7 +673,6 @@ function updateBar(){
   }
 }
 
-/* ---------- Compress Uploaded Receipt Image ---------- */
 function compressReceiptImage(file){
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
@@ -724,7 +700,6 @@ function compressReceiptImage(file){
   });
 }
 
-/* ---------- Checkout Drawer ---------- */
 function openDrawer(){ $("scrim").classList.add("on"); $("drawer").classList.add("on"); }
 function closeDrawer(){ $("scrim").classList.remove("on"); $("drawer").classList.remove("on"); clearInterval(holdTimer); }
 $("scrim").onclick = closeDrawer; $("dClose").onclick = closeDrawer;
@@ -878,7 +853,6 @@ function validate(){
   return ok ? {name,email,phone,vehicle,gcashRefNumber:refNum,receiptImage:uploadedReceiptDataUrl} : null;
 }
 
-/* ---------- Submit Direct GCash Booking ---------- */
 async function submit(){
   const v = validate(); if(!v) return;
   const btn=$("payGo"); btn.disabled=true; btn.textContent="Verifying & Locking Slot…";
@@ -903,17 +877,16 @@ async function submit(){
 
     if(res.ok && data.booking){
       clearInterval(holdTimer);
-      if(!db.bookings.some(b => b.ref === data.booking.ref)){
-        db.bookings.push(data.booking);
-        save();
-      }
+      sel = [];
+      updateBar();
       showTicket(data.booking);
-      loadSlots();
+      await loadSlots();
       toast("Slot held! Staff has been notified to verify your GCash receipt.");
       return;
     }
 
     toast(data.error || "Unable to submit booking.");
+    await loadSlots();
     btn.disabled=false; btn.textContent="Submit Payment & Hold Slot →";
   }catch(e){
     btn.disabled=false; btn.textContent="Submit Payment & Hold Slot →";
@@ -921,7 +894,6 @@ async function submit(){
   }
 }
 
-/* ---------- Audio Chime & Browser Notification Helper (Customer Side) ---------- */
 function playCustomerChime(){
   try {
     const ctx = new (window.AudioContext || window.webkitAudioContext)();
@@ -958,37 +930,19 @@ function startCustomerStatusPolling(bookingRef){
 
   customerPollTimer = setInterval(async () => {
     try {
-      // 1. Check shared localStorage first (instant if tested on same browser)
-      const localFresh = JSON.parse(localStorage.getItem(KEY) || "{}");
-      const localMatch = (localFresh.bookings || []).find(x => x.ref === bookingRef);
-      if(localMatch && localMatch.status === "confirmed"){
-        clearInterval(customerPollTimer);
-        localStorage.removeItem("tps_active_ref");
-        notifyCustomerConfirmed(localMatch);
-        openDrawer();
-        showTicket(localMatch);
-        loadSlots();
-        return;
-      }
-
-      // 2. Check server API status across devices
-      const r = await fetch(`/api/checkout?ref=${encodeURIComponent(bookingRef)}`);
+      const r = await fetch(`/api/checkout?ref=${encodeURIComponent(bookingRef)}&_=${Date.now()}`);
       if(!r.ok) return;
       const d = await r.json();
       if(d.status === "confirmed" && d.booking){
         clearInterval(customerPollTimer);
         localStorage.removeItem("tps_active_ref");
-        const idx = db.bookings.findIndex(x => x.ref === bookingRef);
-        if(idx >= 0) db.bookings[idx].status = "confirmed";
-        else db.bookings.push(d.booking);
-        save();
         notifyCustomerConfirmed(d.booking);
         openDrawer();
         showTicket(d.booking);
         loadSlots();
       }
     } catch(e){}
-  }, 7000);
+  }, 5000);
 }
 
 function showTicket(b){
@@ -1031,7 +985,7 @@ function showTicket(b){
   $("done").onclick = ()=>{ closeDrawer(); sel=[]; updateBar(); loadSlots(); };
 }
 
-/* ---------- Initialize ---------- */
+/* ---------- Initialize & Subscribe to Supabase Realtime ---------- */
 (function init(){
   const r = CONFIG.RIBBON;
   $("ribbonText").innerHTML = (`<span>${esc(r)}</span>`).repeat(8);
@@ -1040,12 +994,33 @@ function showTicket(b){
   renderMonthCalendar();
   renderDays();
   loadSlots();
-  // Resume status polling if player had a pending booking
+
   try {
     const activeRef = localStorage.getItem("tps_active_ref");
     if(activeRef) startCustomerStatusPolling(activeRef);
   } catch(e){}
-  setInterval(()=>{ if(!$("drawer").classList.contains("on")) loadSlots(); }, 30000);
+
+  setInterval(()=>{ if(!$("drawer").classList.contains("on")) loadSlots(); }, 15000);
+
+  if (window.supabase) {
+    const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    sb.channel("public-booking-realtime")
+      .on("postgres_changes", { event: "*", schema: "public", table: "bookings" }, (payload) => {
+        loadSlots();
+        const activeRef = localStorage.getItem("tps_active_ref");
+        if (activeRef && payload.new && payload.new.ref === activeRef && payload.new.status === "confirmed") {
+          clearInterval(customerPollTimer);
+          localStorage.removeItem("tps_active_ref");
+          notifyCustomerConfirmed(payload.new);
+          openDrawer();
+          showTicket(payload.new);
+        }
+      })
+      .on("postgres_changes", { event: "*", schema: "public", table: "blocked_slots" }, () => {
+        loadSlots();
+      })
+      .subscribe();
+  }
 })();
 </script>
 </body>

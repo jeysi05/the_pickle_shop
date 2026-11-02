@@ -1,12 +1,18 @@
-// api/checkout.js
 const START_DATE = "2026-11-23";
+const SUPABASE_URL = process.env.SUPABASE_URL || "https://wxegmiohtbdlnnsjslxu.supabase.co";
+const SUPABASE_KEY =
+  process.env.SUPABASE_SERVICE_ROLE_KEY ||
+  process.env.SUPABASE_ANON_KEY ||
+  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Ind4ZWdtaW9odGJkbG5uc2pzbHh1Iiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc4ODMwOTg1NywiZXhwIjoyMTAzODg1ODU3fQ.QpvvMA1mIaiXt-ukIxcmoIK-znQ_1FzUA7ssVKG57p4";
 
-const memoryStore =
-  globalThis.__tpsDirectStore ||
-  (globalThis.__tpsDirectStore = {
-    bookings: [],
-    usedRefs: new Set(),
-  });
+function sbHeaders() {
+  return {
+    apikey: SUPABASE_KEY,
+    Authorization: `Bearer ${SUPABASE_KEY}`,
+    "Content-Type": "application/json",
+    Prefer: "return=representation",
+  };
+}
 
 function hLabel(hour) {
   const normalized = ((hour % 24) + 24) % 24;
@@ -24,10 +30,7 @@ function isValidDateKey(dateKey) {
     return false;
   }
   const date = new Date(`${dateKey}T00:00:00.000Z`);
-  return (
-    !Number.isNaN(date.getTime()) &&
-    date.toISOString().slice(0, 10) === dateKey
-  );
+  return !Number.isNaN(date.getTime()) && date.toISOString().slice(0, 10) === dateKey;
 }
 
 function getHoursForDate(dateKey) {
@@ -39,9 +42,7 @@ function getHoursForDate(dateKey) {
 }
 
 function validateAndSortHours(dateKey, hours) {
-  if (!isValidDateKey(dateKey)) {
-    return { error: "Invalid booking date." };
-  }
+  if (!isValidDateKey(dateKey)) return { error: "Invalid booking date." };
   if (dateKey < START_DATE) {
     return { error: `Online bookings start on November 23, 2026 (${START_DATE}).` };
   }
@@ -76,9 +77,7 @@ function validateAndSortHours(dateKey, hours) {
 
 async function analyzeReceiptWithGemini(dataUrl, expectedAmount) {
   const apiKey = process.env.GEMINI_API_KEY;
-  if (!apiKey || !dataUrl || !dataUrl.startsWith("data:image/")) {
-    return null;
-  }
+  if (!apiKey || !dataUrl || !dataUrl.startsWith("data:image/")) return null;
 
   try {
     const [meta, base64Data] = dataUrl.split(",");
@@ -131,39 +130,28 @@ async function analyzeReceiptWithGemini(dataUrl, expectedAmount) {
 
 export default async function handler(req, res) {
   res.setHeader("Cache-Control", "no-store, max-age=0");
-  const scriptUrl = process.env.APPS_SCRIPT_URL;
-  const scriptSecret = process.env.APPS_SCRIPT_SECRET || "tps_secret_2026";
-  const ownerEmail = process.env.OWNER_EMAIL || "erikacalimlim08029324@gmail.com";
 
-  // GET /api/checkout?ref=PS-XXXX — Customer live status polling for instant confirmation notification
+  // GET /api/checkout?ref=PS-XXXX — Customer live status check
   if (req.method === "GET") {
     const ref = typeof req.query?.ref === "string" ? req.query.ref.trim() : "";
-    if (!ref) {
-      return res.status(400).json({ error: "Missing booking reference." });
+    if (!ref) return res.status(400).json({ error: "Missing booking reference." });
+
+    try {
+      const r = await fetch(
+        `${SUPABASE_URL}/rest/v1/bookings?ref=eq.${encodeURIComponent(ref)}&select=*`,
+        { headers: sbHeaders() }
+      );
+      const rows = await r.json();
+      const found = Array.isArray(rows) && rows.length ? rows[0] : null;
+      if (!found) return res.status(404).json({ status: "not_found" });
+
+      return res.status(200).json({
+        status: found.status || "payment_review",
+        booking: found,
+      });
+    } catch (e) {
+      return res.status(500).json({ error: "Error checking booking status." });
     }
-
-    let found = memoryStore.bookings.find((b) => b.ref === ref) || null;
-
-    if ((!found || found.status !== "confirmed") && scriptUrl) {
-      try {
-        const r = await fetch(
-          `${scriptUrl}?action=booking_status&ref=${encodeURIComponent(ref)}&secret=${encodeURIComponent(scriptSecret)}`
-        );
-        const data = await r.json();
-        if (data && data.booking) {
-          found = data.booking;
-        }
-      } catch (e) {}
-    }
-
-    if (!found) {
-      return res.status(404).json({ status: "not_found" });
-    }
-
-    return res.status(200).json({
-      status: found.status || "payment_review",
-      booking: found,
-    });
   }
 
   if (req.method !== "POST") {
@@ -179,7 +167,7 @@ export default async function handler(req, res) {
     return res.status(200).json({ scan });
   }
 
-  // 2. Submit Direct GCash Booking -> Hold Slot & Notify Staff
+  // 2. Submit Direct GCash Booking -> Save directly to Supabase
   try {
     const {
       date,
@@ -203,27 +191,50 @@ export default async function handler(req, res) {
       return res.status(400).json({ error: "Please upload your GCash payment receipt screenshot." });
     }
 
-    if (memoryStore.usedRefs.has(cleanRef)) {
+    const validation = validateAndSortHours(date, hours);
+    if (validation.error) {
+      return res.status(400).json({ error: validation.error });
+    }
+    const sortedHours = validation.sortedHours;
+
+    // Check duplicate GCash reference number + existing bookings/blocks on that date in Supabase
+    const [dupResp, dateBookingsResp, dateBlocksResp] = await Promise.all([
+      fetch(
+        `${SUPABASE_URL}/rest/v1/bookings?gcashRefNumber=eq.${encodeURIComponent(cleanRef)}&status=neq.rejected&select=ref`,
+        { headers: sbHeaders() }
+      ),
+      fetch(
+        `${SUPABASE_URL}/rest/v1/bookings?date=eq.${encodeURIComponent(date)}&status=in.(confirmed,payment_review)&select=hours`,
+        { headers: sbHeaders() }
+      ),
+      fetch(
+        `${SUPABASE_URL}/rest/v1/blocked_slots?date_key=eq.${encodeURIComponent(date)}&select=hour_num`,
+        { headers: sbHeaders() }
+      ),
+    ]);
+
+    const dupRows = await dupResp.json();
+    if (Array.isArray(dupRows) && dupRows.length > 0) {
       return res.status(409).json({
         error: "This GCash Reference Number has already been submitted.",
       });
     }
 
-    const validation = validateAndSortHours(date, hours);
-    if (validation.error) {
-      return res.status(400).json({ error: validation.error });
+    const existingBookings = await dateBookingsResp.json();
+    const existingBlocks = await dateBlocksResp.json();
+    const takenHours = new Set();
+
+    if (Array.isArray(existingBookings)) {
+      existingBookings.forEach((b) => {
+        const hrs = Array.isArray(b.hours) ? b.hours : [];
+        hrs.forEach((h) => takenHours.add(Number(h)));
+      });
+    }
+    if (Array.isArray(existingBlocks)) {
+      existingBlocks.forEach((bl) => takenHours.add(Number(bl.hour_num)));
     }
 
-    const sortedHours = validation.sortedHours;
-
-    const conflict = memoryStore.bookings.some(
-      (b) =>
-        b.date === date &&
-        (b.status === "confirmed" || b.status === "payment_review") &&
-        Array.isArray(b.hours) &&
-        b.hours.some((h) => sortedHours.includes(h))
-    );
-    if (conflict) {
+    if (sortedHours.some((h) => takenHours.has(h))) {
       return res.status(409).json({
         error: "One or more selected hours were just taken. Please pick another time.",
       });
@@ -260,29 +271,22 @@ export default async function handler(req, res) {
       at: Date.now(),
     };
 
-    memoryStore.usedRefs.add(cleanRef);
-    memoryStore.bookings.push(booking);
+    const insertResp = await fetch(`${SUPABASE_URL}/rest/v1/bookings`, {
+      method: "POST",
+      headers: sbHeaders(),
+      body: JSON.stringify(booking),
+    });
 
-    // Sync to Google Sheet Apps Script & trigger Staff Email Notification
-    if (scriptUrl) {
-      try {
-        await fetch(scriptUrl, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            secret: scriptSecret,
-            action: "record_booking",
-            notifyOwner: true,
-            ownerEmail,
-            booking,
-          }),
-        });
-      } catch (e) {
-        console.error("Apps Script sync warning:", e);
-      }
+    if (!insertResp.ok) {
+      const errText = await insertResp.text();
+      console.error("Supabase insert error:", errText);
+      return res.status(500).json({ error: "Database error while saving booking." });
     }
 
-    return res.status(200).json({ ok: true, booking });
+    const insertedRows = await insertResp.json();
+    const savedBooking = Array.isArray(insertedRows) && insertedRows[0] ? insertedRows[0] : booking;
+
+    return res.status(200).json({ ok: true, booking: savedBooking });
   } catch (error) {
     console.error("Direct GCash checkout error:", error);
     return res.status(500).json({ error: "Server error while saving your booking." });
