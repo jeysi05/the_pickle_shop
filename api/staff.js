@@ -1,11 +1,7 @@
 import crypto from "crypto";
 
 const SUPABASE_URL = process.env.SUPABASE_URL || "https://wxegmiohtbdlnnsjslxu.supabase.co";
-const SUPABASE_KEY =
-  process.env.SUPABASE_SERVICE_ROLE_KEY ||
-  process.env.SUPABASE_ANON_KEY ||
-  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Ind4ZWdtaW9odGJkbG5uc2pzbHh1Iiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc4ODMwOTg1NywiZXhwIjoyMTAzODg1ODU3fQ.QpvvMA1mIaiXt-ukIxcmoIK-znQ_1FzUA7ssVKG57p4";
-
+const SUPABASE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_ANON_KEY;
 const SESSION_SECRET = process.env.ADMIN_SESSION_SECRET || "pickle_shop_admin_jwt_secret_2026";
 const DEFAULT_PIN = process.env.STAFF_PIN || "2626";
 
@@ -60,7 +56,7 @@ export default async function handler(req, res) {
     return res.status(405).json({ error: "Method not allowed" });
   }
 
-  const { action, pin, oldPin, newPin, date, hour, ref, decision } = req.body || {};
+  const { action, pin, oldPin, newPin, date, hour, label, ref, decision } = req.body || {};
 
   try {
     // 1. Staff Login
@@ -82,7 +78,7 @@ export default async function handler(req, res) {
       return res.status(401).json({ error: "Unauthorized or expired session. Please log in again." });
     }
 
-    // 2. Load Staff Dashboard Data (Bookings + Blocked Slots)
+    // 2. Load Staff Dashboard Data (Bookings + Blocked Slots + Walk-in Labels)
     if (action === "dashboard") {
       const [bResp, blResp] = await Promise.all([
         fetch(`${SUPABASE_URL}/rest/v1/bookings?status=neq.rejected&select=*&order=at.desc`, {
@@ -96,13 +92,20 @@ export default async function handler(req, res) {
       const bookings = await bResp.json();
       const blockedRows = await blResp.json();
 
-      const blocked = Array.isArray(blockedRows)
-        ? blockedRows.map((r) => `${r.date_key}|${r.hour_num}`)
-        : [];
+      const blocked = [];
+      const blockedLabels = {};
+      if (Array.isArray(blockedRows)) {
+        blockedRows.forEach((r) => {
+          const k = `${r.date_key}|${r.hour_num}`;
+          blocked.push(k);
+          if (r.label) blockedLabels[k] = r.label;
+        });
+      }
 
       return res.status(200).json({
         bookings: Array.isArray(bookings) ? bookings : [],
         blocked,
+        blockedLabels,
       });
     }
 
@@ -134,7 +137,7 @@ export default async function handler(req, res) {
       }
     }
 
-    // 4. Remove / Cancel a Confirmed (or Pending) Booking & Reopen Slot
+    // 4. Remove / Cancel a Confirmed Booking & Reopen Slot
     if (action === "cancel_booking") {
       await fetch(
         `${SUPABASE_URL}/rest/v1/bookings?ref=eq.${encodeURIComponent(ref)}`,
@@ -146,7 +149,7 @@ export default async function handler(req, res) {
       return res.status(200).json({ ok: true });
     }
 
-    // 5. Toggle Block/Unblock Slot Globally
+    // 5. Toggle Block/Unblock Slot Globally (with optional Walk-in / Maintenance label)
     if (action === "toggle_block") {
       const hourNum = Number(hour);
       const checkResp = await fetch(
@@ -164,7 +167,11 @@ export default async function handler(req, res) {
         await fetch(`${SUPABASE_URL}/rest/v1/blocked_slots`, {
           method: "POST",
           headers: sbHeaders(),
-          body: JSON.stringify({ date_key: date, hour_num: hourNum }),
+          body: JSON.stringify({
+            date_key: date,
+            hour_num: hourNum,
+            label: String(label || "Blocked").slice(0, 40),
+          }),
         });
       }
       return res.status(200).json({ ok: true });

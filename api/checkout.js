@@ -1,9 +1,6 @@
 const START_DATE = "2026-11-23";
 const SUPABASE_URL = process.env.SUPABASE_URL || "https://wxegmiohtbdlnnsjslxu.supabase.co";
-const SUPABASE_KEY =
-  process.env.SUPABASE_SERVICE_ROLE_KEY ||
-  process.env.SUPABASE_ANON_KEY ||
-  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Ind4ZWdtaW9odGJkbG5uc2pzbHh1Iiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc4ODMwOTg1NywiZXhwIjoyMTAzODg1ODU3fQ.QpvvMA1mIaiXt-ukIxcmoIK-znQ_1FzUA7ssVKG57p4";
+const SUPABASE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_ANON_KEY;
 
 function sbHeaders() {
   return {
@@ -131,16 +128,27 @@ async function analyzeReceiptWithGemini(dataUrl, expectedAmount) {
 export default async function handler(req, res) {
   res.setHeader("Cache-Control", "no-store, max-age=0");
 
-  // GET /api/checkout?ref=PS-XXXX — Customer live status check
+  // GET /api/checkout?ref=PS-XXXX or ?lookup=0917... (Sanitized: never returns receiptImage to public lookup)
   if (req.method === "GET") {
-    const ref = typeof req.query?.ref === "string" ? req.query.ref.trim() : "";
-    if (!ref) return res.status(400).json({ error: "Missing booking reference." });
+    const ref = typeof req.query?.ref === "string" ? req.query.ref.trim().toUpperCase() : "";
+    const lookup = typeof req.query?.lookup === "string" ? req.query.lookup.trim() : "";
 
     try {
-      const r = await fetch(
-        `${SUPABASE_URL}/rest/v1/bookings?ref=eq.${encodeURIComponent(ref)}&select=*`,
-        { headers: sbHeaders() }
-      );
+      let queryUrl = "";
+      if (ref) {
+        queryUrl = `${SUPABASE_URL}/rest/v1/bookings?ref=eq.${encodeURIComponent(ref)}&select=ref,date,hours,timeRange,name,phone,vehicle,gcashRefNumber,amount,status,at`;
+      } else if (lookup) {
+        const cleanLookup = lookup.replace(/[\s-]/g, "");
+        if (/^PS-/i.test(cleanLookup)) {
+          queryUrl = `${SUPABASE_URL}/rest/v1/bookings?ref=eq.${encodeURIComponent(cleanLookup.toUpperCase())}&select=ref,date,hours,timeRange,name,phone,vehicle,gcashRefNumber,amount,status,at`;
+        } else {
+          queryUrl = `${SUPABASE_URL}/rest/v1/bookings?phone=eq.${encodeURIComponent(cleanLookup)}&status=neq.rejected&order=at.desc&limit=1&select=ref,date,hours,timeRange,name,phone,vehicle,gcashRefNumber,amount,status,at`;
+        }
+      } else {
+        return res.status(400).json({ error: "Missing booking reference." });
+      }
+
+      const r = await fetch(queryUrl, { headers: sbHeaders() });
       const rows = await r.json();
       const found = Array.isArray(rows) && rows.length ? rows[0] : null;
       if (!found) return res.status(404).json({ status: "not_found" });
@@ -161,13 +169,11 @@ export default async function handler(req, res) {
 
   const body = req.body || {};
 
-  // 1. Pre-scan receipt image with Gemini AI
   if (body.action === "scan_receipt") {
     const scan = await analyzeReceiptWithGemini(body.receiptImage, body.expectedAmount);
     return res.status(200).json({ scan });
   }
 
-  // 2. Submit Direct GCash Booking -> Save directly to Supabase
   try {
     const {
       date,
@@ -188,7 +194,7 @@ export default async function handler(req, res) {
       return res.status(400).json({ error: "Please enter a valid GCash Reference Number." });
     }
     if (!receiptImage) {
-      return res.status(400).json({ error: "Please upload your GCash payment receipt screenshot." });
+      return res.status(400).json({ error: "Please attach your GCash payment receipt screenshot." });
     }
 
     const validation = validateAndSortHours(date, hours);
@@ -197,7 +203,6 @@ export default async function handler(req, res) {
     }
     const sortedHours = validation.sortedHours;
 
-    // Check duplicate GCash reference number + existing bookings/blocks on that date in Supabase
     const [dupResp, dateBookingsResp, dateBlocksResp] = await Promise.all([
       fetch(
         `${SUPABASE_URL}/rest/v1/bookings?gcashRefNumber=eq.${encodeURIComponent(cleanRef)}&status=neq.rejected&select=ref`,
@@ -241,9 +246,10 @@ export default async function handler(req, res) {
     }
 
     const subtotal = sortedHours.reduce((sum, hour) => sum + priceForHour(hour), 0);
+    const hasAfterMidnight = sortedHours.some((h) => h >= 24);
     const timeRange = `${hLabel(sortedHours[0])}–${hLabel(
       sortedHours[sortedHours.length - 1] + 1
-    )}`;
+    )}${hasAfterMidnight ? " (After MN)" : ""}`;
 
     const aiScan = await analyzeReceiptWithGemini(receiptImage, subtotal);
     const ref =
