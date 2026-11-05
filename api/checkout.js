@@ -1,6 +1,9 @@
 const START_DATE = "2026-11-23";
 const SUPABASE_URL = process.env.SUPABASE_URL || "https://wxegmiohtbdlnnsjslxu.supabase.co";
-const SUPABASE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_ANON_KEY;
+const SUPABASE_KEY =
+  process.env.SUPABASE_SERVICE_ROLE_KEY ||
+  process.env.SUPABASE_ANON_KEY ||
+  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Ind4ZWdtaW9odGJkbG5uc2pzbHh1Iiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc4ODMwOTg1NywiZXhwIjoyMTAzODg1ODU3fQ.QpvvMA1mIaiXt-ukIxcmoIK-znQ_1FzUA7ssVKG57p4";
 
 function sbHeaders() {
   return {
@@ -9,6 +12,14 @@ function sbHeaders() {
     "Content-Type": "application/json",
     Prefer: "return=representation",
   };
+}
+
+function sanitizePublicBooking(row) {
+  if (!row) return null;
+  const copy = { ...row };
+  delete copy.receiptImage;
+  delete copy.receipt_image;
+  return copy;
 }
 
 function hLabel(hour) {
@@ -128,30 +139,46 @@ async function analyzeReceiptWithGemini(dataUrl, expectedAmount) {
 export default async function handler(req, res) {
   res.setHeader("Cache-Control", "no-store, max-age=0");
 
-  // GET /api/checkout?ref=PS-XXXX or ?lookup=0917... (Sanitized: never returns receiptImage to public lookup)
+  // GET /api/checkout?ref=PS-XXXX or ?lookup=PS-XXXX / 0917...
   if (req.method === "GET") {
-    const ref = typeof req.query?.ref === "string" ? req.query.ref.trim().toUpperCase() : "";
-    const lookup = typeof req.query?.lookup === "string" ? req.query.lookup.trim() : "";
+    const rawRef = typeof req.query?.ref === "string" ? req.query.ref.trim() : "";
+    const rawLookup = typeof req.query?.lookup === "string" ? req.query.lookup.trim() : "";
+    const target = rawRef || rawLookup;
+
+    if (!target) {
+      return res.status(400).json({ error: "Missing booking reference." });
+    }
 
     try {
+      const compact = target.replace(/\s+/g, "").toUpperCase();
       let queryUrl = "";
-      if (ref) {
-        queryUrl = `${SUPABASE_URL}/rest/v1/bookings?ref=eq.${encodeURIComponent(ref)}&select=ref,date,hours,timeRange,name,phone,vehicle,gcashRefNumber,amount,status,at`;
-      } else if (lookup) {
-        const cleanLookup = lookup.replace(/[\s-]/g, "");
-        if (/^PS-/i.test(cleanLookup)) {
-          queryUrl = `${SUPABASE_URL}/rest/v1/bookings?ref=eq.${encodeURIComponent(cleanLookup.toUpperCase())}&select=ref,date,hours,timeRange,name,phone,vehicle,gcashRefNumber,amount,status,at`;
-        } else {
-          queryUrl = `${SUPABASE_URL}/rest/v1/bookings?phone=eq.${encodeURIComponent(cleanLookup)}&status=neq.rejected&order=at.desc&limit=1&select=ref,date,hours,timeRange,name,phone,vehicle,gcashRefNumber,amount,status,at`;
-        }
+
+      // 1. If it starts with PS (e.g. PS-EB5368 or PSEB5368), search by ref
+      if (/^PS-?[A-Z0-9]+$/.test(compact)) {
+        const normalizedRef = compact.startsWith("PS-")
+          ? compact
+          : `PS-${compact.slice(2)}`;
+        queryUrl = `${SUPABASE_URL}/rest/v1/bookings?ref=ilike.${encodeURIComponent(normalizedRef)}&select=*`;
       } else {
-        return res.status(400).json({ error: "Missing booking reference." });
+        // 2. Otherwise treat as phone number (support both 09... and +639... formats)
+        const digitsOnly = compact.replace(/\D/g, "");
+        const last9 = digitsOnly.slice(-9); // e.g. 9761479617 -> 761479617
+        if (last9.length >= 9) {
+          const localFormat = `09${last9}`;
+          const intlFormat = `+639${last9}`;
+          queryUrl = `${SUPABASE_URL}/rest/v1/bookings?phone=in.(${encodeURIComponent(localFormat)},${encodeURIComponent(intlFormat)},${encodeURIComponent(compact)})&status=neq.rejected&order=at.desc&limit=1&select=*`;
+        } else {
+          queryUrl = `${SUPABASE_URL}/rest/v1/bookings?phone=eq.${encodeURIComponent(compact)}&status=neq.rejected&order=at.desc&limit=1&select=*`;
+        }
       }
 
       const r = await fetch(queryUrl, { headers: sbHeaders() });
       const rows = await r.json();
-      const found = Array.isArray(rows) && rows.length ? rows[0] : null;
-      if (!found) return res.status(404).json({ status: "not_found" });
+      const found = Array.isArray(rows) && rows.length ? sanitizePublicBooking(rows[0]) : null;
+
+      if (!found) {
+        return res.status(404).json({ status: "not_found" });
+      }
 
       return res.status(200).json({
         status: found.status || "payment_review",
@@ -292,7 +319,7 @@ export default async function handler(req, res) {
     const insertedRows = await insertResp.json();
     const savedBooking = Array.isArray(insertedRows) && insertedRows[0] ? insertedRows[0] : booking;
 
-    return res.status(200).json({ ok: true, booking: savedBooking });
+    return res.status(200).json({ ok: true, booking: sanitizePublicBooking(savedBooking) });
   } catch (error) {
     console.error("Direct GCash checkout error:", error);
     return res.status(500).json({ error: "Server error while saving your booking." });
